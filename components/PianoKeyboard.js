@@ -5,15 +5,53 @@ import { Audio } from 'expo-av';
 const PianoKeyboard = () => {
   const [selectedKeys, setSelectedKeys] = useState(new Set());
   const [currentChord, setCurrentChord] = useState(null);
+  const [currentInversion, setCurrentInversion] = useState(0);
   const [showResult, setShowResult] = useState(false);
   const [isCorrect, setIsCorrect] = useState(null);
 
   const chords = [
-    { name: 'C', notes: ['C4', 'E4', 'G4'] },
-    { name: 'Cm', notes: ['C4', 'D#4', 'G4'] },
-    { name: 'C7', notes: ['C4', 'E4', 'G4', 'A#4'] },
-    { name: 'Cmaj7', notes: ['C4', 'E4', 'G4', 'B4'] },
-    { name: 'Cdim', notes: ['C4', 'D#4', 'F#4'] },
+    { 
+      name: 'C', 
+      notes: {
+        root: ['C4', 'E4', 'G4'],
+        first: ['E4', 'G4', 'C5'],
+        second: ['G4', 'C5', 'E5']
+      }
+    },
+    { 
+      name: 'Cm', 
+      notes: {
+        root: ['C4', 'D#4', 'G4'],
+        first: ['D#4', 'G4', 'C5'],
+        second: ['G4', 'C5', 'D#5']
+      }
+    },
+    { 
+      name: 'C7', 
+      notes: {
+        root: ['C4', 'E4', 'G4', 'A#4'],
+        first: ['E4', 'G4', 'A#4', 'C5'],
+        second: ['G4', 'A#4', 'C5', 'E5'],
+        third: ['A#4', 'C5', 'E5', 'G5']
+      }
+    },
+    { 
+      name: 'Cmaj7', 
+      notes: {
+        root: ['C4', 'E4', 'G4', 'B4'],
+        first: ['E4', 'G4', 'B4', 'C5'],
+        second: ['G4', 'B4', 'C5', 'E5'],
+        third: ['B4', 'C5', 'E5', 'G5']
+      }
+    },
+    { 
+      name: 'Cdim', 
+      notes: {
+        root: ['C4', 'D#4', 'F#4'],
+        first: ['D#4', 'F#4', 'C5'],
+        second: ['F#4', 'C5', 'D#5']
+      }
+    },
   ];
 
   const notes = [
@@ -55,10 +93,24 @@ const PianoKeyboard = () => {
 
   const generateNewChord = () => {
     const randomChord = chords[Math.floor(Math.random() * chords.length)];
+    const availableInversions = Object.keys(randomChord.notes);
+    const randomInversion = availableInversions[Math.floor(Math.random() * availableInversions.length)];
+    
     setCurrentChord(randomChord);
+    setCurrentInversion(randomInversion);
     setSelectedKeys(new Set());
     setShowResult(false);
     setIsCorrect(null);
+  };
+  
+  const getInversionName = (inversion) => {
+    const names = {
+      root: 'root position',
+      first: '1st inversion',
+      second: '2nd inversion',
+      third: '3rd inversion'
+    };
+    return names[inversion] || 'root position';
   };
 
   const playTone = async (frequency) => {
@@ -128,10 +180,10 @@ const PianoKeyboard = () => {
   };
 
   const checkAnswer = () => {
-    if (!currentChord) return;
+    if (!currentChord || !currentInversion) return;
     
     const selectedArray = Array.from(selectedKeys).sort();
-    const correctArray = [...currentChord.notes].sort();
+    const correctArray = [...currentChord.notes[currentInversion]].sort();
     
     const isAnswerCorrect = 
       selectedArray.length === correctArray.length &&
@@ -173,7 +225,7 @@ const PianoKeyboard = () => {
       return selectedKeys.has(note) ? 'selected' : 'normal';
     }
     
-    const isInChord = currentChord.notes.includes(note);
+    const isInChord = currentChord.notes[currentInversion].includes(note);
     const isSelected = selectedKeys.has(note);
     
     if (isInChord && isSelected) {
@@ -246,7 +298,8 @@ const PianoKeyboard = () => {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.chordName}>Play the chord: {currentChord?.name}</Text>
+        <Text style={styles.chordName}>{currentChord?.name}</Text>
+        <Text style={styles.inversionText}>{getInversionName(currentInversion)}</Text>
       </View>
       
       <View style={styles.keyboard}>
@@ -287,10 +340,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   chordName: {
-    fontSize: 32,
+    fontSize: 36,
     fontWeight: 'bold',
     color: 'white',
-    marginBottom: 10,
+    marginBottom: 5,
+  },
+  inversionText: {
+    fontSize: 20,
+    color: '#ecf0f1',
+    fontStyle: 'italic',
   },
   keyboard: {
     height: 200,
