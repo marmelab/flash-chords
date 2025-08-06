@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import PianoKey from './PianoKey';
 import ChordControls from './ChordControls';
 import { chords, notes, getInversionName } from '../data/chords';
@@ -12,6 +12,7 @@ const PianoKeyboard = () => {
   const [currentInversion, setCurrentInversion] = useState(0);
   const [showResult, setShowResult] = useState(false);
   const [isCorrect, setIsCorrect] = useState(null);
+  const [soundEnabled, setSoundEnabled] = useState(true);
 
   useEffect(() => {
     initAudio();
@@ -33,7 +34,9 @@ const PianoKeyboard = () => {
   const handleKeyPress = (note, frequency) => {
     if (showResult) return;
     
-    playTone(frequency);
+    if (soundEnabled) {
+      playTone(frequency);
+    }
     
     const newSelectedKeys = new Set(selectedKeys);
     if (newSelectedKeys.has(note)) {
@@ -135,6 +138,15 @@ const PianoKeyboard = () => {
 
   return (
     <View style={styles.container}>
+      <TouchableOpacity 
+        style={styles.soundToggle}
+        onPress={() => setSoundEnabled(!soundEnabled)}
+      >
+        <Text style={styles.soundToggleText}>
+          {soundEnabled ? '🔊' : '🔇'}
+        </Text>
+      </TouchableOpacity>
+      
       <View style={styles.header}>
         <Text style={styles.chordName}>{currentChord?.name}</Text>
         <Text style={styles.inversionText}>{getInversionName(currentInversion)}</Text>
@@ -160,6 +172,21 @@ const styles = StyleSheet.create({
     backgroundColor: '#2c3e50',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  soundToggle: {
+    position: 'absolute',
+    top: 40,
+    right: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    borderRadius: 25,
+    width: 50,
+    height: 50,
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 10,
+  },
+  soundToggleText: {
+    fontSize: 24,
   },
   header: {
     marginBottom: 30,
