@@ -5,7 +5,7 @@ import { Audio } from 'expo-av';
 const PianoKeyboard = () => {
   const [selectedKeys, setSelectedKeys] = useState(new Set());
   const [currentChord, setCurrentChord] = useState(null);
-  const [feedback, setFeedback] = useState('');
+  const [showResult, setShowResult] = useState(false);
   const [isCorrect, setIsCorrect] = useState(null);
 
   const chords = [
@@ -57,7 +57,7 @@ const PianoKeyboard = () => {
     const randomChord = chords[Math.floor(Math.random() * chords.length)];
     setCurrentChord(randomChord);
     setSelectedKeys(new Set());
-    setFeedback('');
+    setShowResult(false);
     setIsCorrect(null);
   };
 
@@ -138,13 +138,12 @@ const PianoKeyboard = () => {
       selectedArray.every((note, index) => note === correctArray[index]);
     
     setIsCorrect(isAnswerCorrect);
+    setShowResult(true);
+    
     if (isAnswerCorrect) {
-      setFeedback('Correct! Well done!');
       setTimeout(() => {
         generateNewChord();
-      }, 2000);
-    } else {
-      setFeedback(`Incorrect. The correct notes are: ${currentChord.notes.join(', ')}`);
+      }, 1500);
     }
   };
 
@@ -169,23 +168,45 @@ const PianoKeyboard = () => {
     return (whiteKeyPos * whiteKeyWidth) - (blackKeyWidth / 2);
   };
 
+  const getKeyStyle = (note) => {
+    if (!showResult) {
+      return selectedKeys.has(note) ? 'selected' : 'normal';
+    }
+    
+    const isInChord = currentChord.notes.includes(note);
+    const isSelected = selectedKeys.has(note);
+    
+    if (isInChord && isSelected) {
+      return 'correct';
+    } else if (isInChord && !isSelected) {
+      return 'expected';
+    } else if (!isInChord && isSelected) {
+      return 'wrong';
+    }
+    return 'normal';
+  };
+
   const renderKeys = () => {
     const keys = [];
     let whiteKeyIndex = 0;
     
     notes.forEach((note, index) => {
       if (note.type === 'white') {
-        const isSelected = selectedKeys.has(note.note);
+        const keyStyle = getKeyStyle(note.note);
         keys.push(
           <TouchableOpacity
             key={note.note}
             style={[
               styles.whiteKey, 
               { left: whiteKeyIndex * whiteKeyWidth },
-              isSelected && styles.selectedWhiteKey
+              keyStyle === 'selected' && styles.selectedWhiteKey,
+              keyStyle === 'correct' && styles.correctWhiteKey,
+              keyStyle === 'expected' && styles.expectedWhiteKey,
+              keyStyle === 'wrong' && styles.wrongWhiteKey
             ]}
-            onPress={() => handleKeyPress(note.note, note.freq)}
+            onPress={() => !showResult && handleKeyPress(note.note, note.freq)}
             activeOpacity={0.8}
+            disabled={showResult}
           >
             <Text style={styles.whiteKeyText}>{note.note.replace(/[0-9]/g, '')}</Text>
           </TouchableOpacity>
@@ -197,17 +218,21 @@ const PianoKeyboard = () => {
     notes.forEach((note, index) => {
       if (note.type === 'black') {
         const position = getBlackKeyPosition(note.note);
-        const isSelected = selectedKeys.has(note.note);
+        const keyStyle = getKeyStyle(note.note);
         keys.push(
           <TouchableOpacity
             key={note.note}
             style={[
               styles.blackKey, 
               { left: position },
-              isSelected && styles.selectedBlackKey
+              keyStyle === 'selected' && styles.selectedBlackKey,
+              keyStyle === 'correct' && styles.correctBlackKey,
+              keyStyle === 'expected' && styles.expectedBlackKey,
+              keyStyle === 'wrong' && styles.wrongBlackKey
             ]}
-            onPress={() => handleKeyPress(note.note, note.freq)}
+            onPress={() => !showResult && handleKeyPress(note.note, note.freq)}
             activeOpacity={0.8}
+            disabled={showResult}
           >
             <Text style={styles.blackKeyText}>{note.note.replace(/[0-9]/g, '')}</Text>
           </TouchableOpacity>
@@ -222,11 +247,6 @@ const PianoKeyboard = () => {
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.chordName}>Play the chord: {currentChord?.name}</Text>
-        {feedback !== '' && (
-          <Text style={[styles.feedback, isCorrect ? styles.correct : styles.incorrect]}>
-            {feedback}
-          </Text>
-        )}
       </View>
       
       <View style={styles.keyboard}>
@@ -234,8 +254,16 @@ const PianoKeyboard = () => {
       </View>
       
       <View style={styles.controls}>
-        <TouchableOpacity style={styles.submitButton} onPress={checkAnswer}>
-          <Text style={styles.submitButtonText}>Submit Answer</Text>
+        <TouchableOpacity 
+          style={[
+            styles.submitButton,
+            showResult && (isCorrect ? styles.correctButton : styles.incorrectButton)
+          ]} 
+          onPress={checkAnswer}
+        >
+          <Text style={styles.submitButtonText}>
+            {!showResult ? 'Submit' : (isCorrect ? '✓' : '✗')}
+          </Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.newButton} onPress={generateNewChord}>
           <Text style={styles.newButtonText}>New Chord</Text>
@@ -264,20 +292,6 @@ const styles = StyleSheet.create({
     color: 'white',
     marginBottom: 10,
   },
-  feedback: {
-    fontSize: 18,
-    fontWeight: '600',
-    padding: 10,
-    borderRadius: 5,
-  },
-  correct: {
-    color: '#27ae60',
-    backgroundColor: 'rgba(39, 174, 96, 0.1)',
-  },
-  incorrect: {
-    color: '#e74c3c',
-    backgroundColor: 'rgba(231, 76, 60, 0.1)',
-  },
   keyboard: {
     height: 200,
     width: 700,
@@ -297,6 +311,15 @@ const styles = StyleSheet.create({
   selectedWhiteKey: {
     backgroundColor: '#3498db',
   },
+  correctWhiteKey: {
+    backgroundColor: '#27ae60',
+  },
+  expectedWhiteKey: {
+    backgroundColor: '#27ae60',
+  },
+  wrongWhiteKey: {
+    backgroundColor: '#e74c3c',
+  },
   blackKey: {
     position: 'absolute',
     width: 30,
@@ -309,6 +332,15 @@ const styles = StyleSheet.create({
   },
   selectedBlackKey: {
     backgroundColor: '#2980b9',
+  },
+  correctBlackKey: {
+    backgroundColor: '#229954',
+  },
+  expectedBlackKey: {
+    backgroundColor: '#229954',
+  },
+  wrongBlackKey: {
+    backgroundColor: '#c0392b',
   },
   whiteKeyText: {
     color: 'black',
@@ -330,6 +362,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 30,
     paddingVertical: 15,
     borderRadius: 8,
+    minWidth: 120,
+    alignItems: 'center',
+  },
+  correctButton: {
+    backgroundColor: '#27ae60',
+  },
+  incorrectButton: {
+    backgroundColor: '#e74c3c',
   },
   submitButtonText: {
     color: 'white',
