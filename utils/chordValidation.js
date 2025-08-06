@@ -6,6 +6,43 @@
 export const removeOctave = (note) => note.replace(/[0-9]/g, '');
 
 /**
+ * Parses a note string into note name and octave
+ * @param {string} noteStr - Note string like "C4" or "D#5"
+ * @returns {{note: string, octave: number}} Parsed note object
+ */
+const parseNote = (noteStr) => {
+  const match = noteStr.match(/([A-G]#?)(\d)/);
+  if (!match) return null;
+  return { note: match[1], octave: parseInt(match[2]) };
+};
+
+/**
+ * Gets the chromatic position of a note (C=0, C#=1, D=2, etc.)
+ * @param {string} note - Note name without octave
+ * @returns {number} Chromatic position 0-11
+ */
+const getNotePosition = (note) => {
+  const noteOrder = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+  return noteOrder.indexOf(note);
+};
+
+/**
+ * Sorts notes by absolute pitch (considering octave and note position)
+ * @param {string[]} notes - Array of note strings
+ * @returns {object[]} Sorted array of parsed note objects
+ */
+const sortByPitch = (notes) => {
+  return notes
+    .map(parseNote)
+    .filter(n => n !== null)
+    .sort((a, b) => {
+      const aPitch = a.octave * 12 + getNotePosition(a.note);
+      const bPitch = b.octave * 12 + getNotePosition(b.note);
+      return aPitch - bPitch;
+    });
+};
+
+/**
  * Validates if the selected notes match the expected chord
  * Accepts the chord in any octave but maintains the same inversion
  * 
@@ -19,21 +56,35 @@ export const validateChord = (selectedNotes, expectedNotes) => {
     return false;
   }
 
-  // Get selected notes and expected notes without octaves
-  const selectedNotesWithoutOctave = selectedNotes.map(removeOctave);
-  const expectedNotesWithoutOctave = expectedNotes.map(removeOctave);
+  // Parse the notes to get their components
+  const selectedParsed = selectedNotes.map(parseNote).filter(n => n !== null);
+  const expectedParsed = expectedNotes.map(parseNote).filter(n => n !== null);
 
-  // Check if the selected notes contain all the correct notes (ignoring octave)
-  const hasAllNotes = expectedNotesWithoutOctave.every(expectedNote => 
-    selectedNotesWithoutOctave.includes(expectedNote)
+  if (selectedParsed.length !== expectedParsed.length) {
+    return false;
+  }
+
+  // Check if notes match in the same order (ignoring octave)
+  const notesMatchInOrder = selectedParsed.every((selected, index) => 
+    selected.note === expectedParsed[index].note
   );
 
-  // Check if there are no extra notes
-  const noExtraNotes = selectedNotesWithoutOctave.every(selectedNote => 
-    expectedNotesWithoutOctave.includes(selectedNote)
+  if (!notesMatchInOrder) {
+    return false;
+  }
+
+  // Check that all notes are transposed by the same amount
+  // (all in the same octave relative to the original)
+  const octaveDifferences = selectedParsed.map((selected, index) => 
+    selected.octave - expectedParsed[index].octave
   );
 
-  return hasAllNotes && noExtraNotes;
+  // All octave differences should be the same
+  const allSameOctaveShift = octaveDifferences.every(diff => 
+    diff === octaveDifferences[0]
+  );
+
+  return notesMatchInOrder && allSameOctaveShift;
 };
 
 /**
