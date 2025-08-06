@@ -114,12 +114,26 @@ export const getKeyStyle = (note, selectedKeys, chordNotes, showResult, isCorrec
   
   const isSelected = selectedKeys.has(note);
   
-  if (isSelected && isInChordPattern) {
-    return 'correct';  // Selected and it's a correct note (any octave)
-  } else if (isSelected && !isInChordPattern) {
-    return 'wrong';  // Selected but not part of the chord
-  } else if (!isCorrect && isExactNote && !isSelected) {
-    return 'expected';  // Only show expected notes when the answer is wrong
+  // If the answer is correct overall
+  if (isCorrect) {
+    if (isSelected && isInChordPattern) {
+      return 'correct';  // Selected and it's a correct note
+    }
+    return 'normal';
   }
+  
+  // If the answer is incorrect
+  if (isSelected && isExactNote) {
+    // This exact note is both selected AND in the expected chord position
+    return 'correct';  // Show as correct since it's in the right place
+  } else if (isSelected && isInChordPattern) {
+    // The note is part of the chord but not in the right position/octave
+    return 'wrong';  
+  } else if (isSelected && !isInChordPattern) {
+    return 'wrong';  // Selected but not part of the chord at all
+  } else if (isExactNote && !isSelected) {
+    return 'expected';  // Show expected notes when the answer is wrong
+  }
+  
   return 'normal';
 };

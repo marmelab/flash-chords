@@ -180,13 +180,19 @@ describe("getKeyStyle", () => {
         );
       });
 
-      test("shows correct selected notes as correct", () => {
+      test("shows exact matching notes as correct even when answer is incorrect", () => {
         const selectedKeys = new Set(["C4", "F4", "G4"]);
+        // C4 and G4 are in the exact position expected, so they show as correct
         expect(getKeyStyle("C4", selectedKeys, chordNotes, true, false)).toBe(
           "correct"
         );
         expect(getKeyStyle("G4", selectedKeys, chordNotes, true, false)).toBe(
           "correct"
+        );
+        // But C5 would be wrong (right note, wrong octave)
+        const selectedKeys2 = new Set(["C5", "E5", "G5"]);
+        expect(getKeyStyle("C5", selectedKeys2, chordNotes, true, false)).toBe(
+          "wrong"
         );
       });
 

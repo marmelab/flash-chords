@@ -60,7 +60,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#27ae60',
   },
   expectedWhiteKey: {
-    backgroundColor: '#27ae60',
+    backgroundColor: '#95d5b2',  // Lighter green for expected keys
   },
   wrongWhiteKey: {
     backgroundColor: '#e74c3c',
@@ -82,7 +82,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#229954',
   },
   expectedBlackKey: {
-    backgroundColor: '#229954',
+    backgroundColor: '#52b788',  // Lighter green for expected black keys
   },
   wrongBlackKey: {
     backgroundColor: '#c0392b',
