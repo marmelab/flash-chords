@@ -4,6 +4,7 @@ import PianoKey from './PianoKey';
 import ChordControls from './ChordControls';
 import { chords, notes, getInversionName } from '../data/chords';
 import { initAudio, playTone } from '../utils/audio';
+import { validateChord, getKeyStyle as getKeyStyleUtil } from '../utils/chordValidation';
 
 const PianoKeyboard = () => {
   const [selectedKeys, setSelectedKeys] = useState(new Set());
@@ -46,12 +47,10 @@ const PianoKeyboard = () => {
   const checkAnswer = () => {
     if (!currentChord || !currentInversion) return;
     
-    const selectedArray = Array.from(selectedKeys).sort();
-    const correctArray = [...currentChord.notes[currentInversion]].sort();
+    const selectedArray = Array.from(selectedKeys);
+    const correctArray = [...currentChord.notes[currentInversion]];
     
-    const isAnswerCorrect = 
-      selectedArray.length === correctArray.length &&
-      selectedArray.every((note, index) => note === correctArray[index]);
+    const isAnswerCorrect = validateChord(selectedArray, correctArray);
     
     setIsCorrect(isAnswerCorrect);
     setShowResult(true);
@@ -64,21 +63,13 @@ const PianoKeyboard = () => {
   };
 
   const getKeyStyle = (note) => {
-    if (!showResult) {
-      return selectedKeys.has(note) ? 'selected' : 'normal';
-    }
-    
-    const isInChord = currentChord.notes[currentInversion].includes(note);
-    const isSelected = selectedKeys.has(note);
-    
-    if (isInChord && isSelected) {
-      return 'correct';
-    } else if (isInChord && !isSelected) {
-      return 'expected';
-    } else if (!isInChord && isSelected) {
-      return 'wrong';
-    }
-    return 'normal';
+    return getKeyStyleUtil(
+      note,
+      selectedKeys,
+      currentChord?.notes[currentInversion] || [],
+      showResult,
+      isCorrect
+    );
   };
 
   const getKeyPosition = (note, index, whiteKeyIndex) => {
