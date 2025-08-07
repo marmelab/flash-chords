@@ -6,7 +6,7 @@ import { chords, notes, getInversionName } from '../data/chords';
 import { initAudio, playTone } from '../utils/audio';
 import { validateChord, getKeyStyle as getKeyStyleUtil } from '../utils/chordValidation';
 
-const PianoKeyboard = () => {
+const PianoKeyboard = ({ settings, onGoBack }) => {
   const [selectedKeys, setSelectedKeys] = useState(new Set());
   const [currentChord, setCurrentChord] = useState(null);
   const [currentInversion, setCurrentInversion] = useState(0);
@@ -21,7 +21,24 @@ const PianoKeyboard = () => {
 
   const generateNewChord = () => {
     const randomChord = chords[Math.floor(Math.random() * chords.length)];
-    const availableInversions = Object.keys(randomChord.notes);
+    
+    // Filter inversions based on settings
+    let availableInversions = [];
+    if (settings?.inversions?.root && randomChord.notes.root) {
+      availableInversions.push('root');
+    }
+    if (settings?.inversions?.first && randomChord.notes.first) {
+      availableInversions.push('first');
+    }
+    if (settings?.inversions?.second && randomChord.notes.second) {
+      availableInversions.push('second');
+    }
+    
+    // Fallback to all inversions if none selected or no settings
+    if (availableInversions.length === 0) {
+      availableInversions = Object.keys(randomChord.notes);
+    }
+    
     const randomInversion = availableInversions[Math.floor(Math.random() * availableInversions.length)];
     
     setCurrentChord(randomChord);
@@ -139,6 +156,13 @@ const PianoKeyboard = () => {
   return (
     <View style={styles.container}>
       <TouchableOpacity 
+        style={styles.backButton}
+        onPress={onGoBack}
+      >
+        <Text style={styles.backButtonText}>← Back</Text>
+      </TouchableOpacity>
+      
+      <TouchableOpacity 
         style={styles.soundToggle}
         onPress={() => setSoundEnabled(!soundEnabled)}
       >
@@ -172,6 +196,21 @@ const styles = StyleSheet.create({
     backgroundColor: '#2c3e50',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  backButton: {
+    position: 'absolute',
+    top: 40,
+    left: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    borderRadius: 8,
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+    zIndex: 10,
+  },
+  backButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600',
   },
   soundToggle: {
     position: 'absolute',
