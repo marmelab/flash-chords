@@ -3,19 +3,26 @@ import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, View } from 'react-native';
 import HomeScreen from './components/HomeScreen';
 import PianoKeyboard from './components/PianoKeyboard';
+import { generateChordDeck } from './utils/deckGenerator';
 
 export default function App() {
   const [currentScreen, setCurrentScreen] = useState('home');
   const [exerciseSettings, setExerciseSettings] = useState(null);
+  const [chordDeck, setChordDeck] = useState(null);
 
   const handleStartExercise = (settings) => {
+    // Generate the chord deck based on settings
+    const deck = generateChordDeck(settings);
+    
     setExerciseSettings(settings);
+    setChordDeck(deck);
     setCurrentScreen('practice');
   };
 
   const handleGoBack = () => {
     setCurrentScreen('home');
     setExerciseSettings(null);
+    setChordDeck(null);
   };
 
   return (
@@ -23,7 +30,11 @@ export default function App() {
       {currentScreen === 'home' ? (
         <HomeScreen onStartExercise={handleStartExercise} />
       ) : (
-        <PianoKeyboard settings={exerciseSettings} onGoBack={handleGoBack} />
+        <PianoKeyboard 
+          settings={exerciseSettings} 
+          chordDeck={chordDeck}
+          onGoBack={handleGoBack} 
+        />
       )}
       <StatusBar style="light" />
     </View>

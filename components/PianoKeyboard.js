@@ -5,8 +5,9 @@ import ChordControls from './ChordControls';
 import { chords, notes, getInversionName } from '../data/chords';
 import { initAudio, playTone } from '../utils/audio';
 import { validateChord, getKeyStyle as getKeyStyleUtil } from '../utils/chordValidation';
+import { selectRandomFromDeck } from '../utils/deckGenerator';
 
-const PianoKeyboard = ({ settings, onGoBack }) => {
+const PianoKeyboard = ({ settings, chordDeck, onGoBack }) => {
   const [selectedKeys, setSelectedKeys] = useState(new Set());
   const [currentChord, setCurrentChord] = useState(null);
   const [currentInversion, setCurrentInversion] = useState(0);
@@ -20,25 +21,23 @@ const PianoKeyboard = ({ settings, onGoBack }) => {
   }, []);
 
   const generateNewChord = () => {
+    // If we have a deck, select from it; otherwise fall back to all chords
+    if (chordDeck && chordDeck.length > 0) {
+      const selectedChordData = selectRandomFromDeck(chordDeck);
+      
+      if (selectedChordData) {
+        setCurrentChord(selectedChordData.chord);
+        setCurrentInversion(selectedChordData.inversion);
+        setSelectedKeys(new Set());
+        setShowResult(false);
+        setIsCorrect(null);
+        return;
+      }
+    }
+    
+    // Fallback: select from all chords (shouldn't happen with proper deck)
     const randomChord = chords[Math.floor(Math.random() * chords.length)];
-    
-    // Filter inversions based on settings
-    let availableInversions = [];
-    if (settings?.inversions?.root && randomChord.notes.root) {
-      availableInversions.push('root');
-    }
-    if (settings?.inversions?.first && randomChord.notes.first) {
-      availableInversions.push('first');
-    }
-    if (settings?.inversions?.second && randomChord.notes.second) {
-      availableInversions.push('second');
-    }
-    
-    // Fallback to all inversions if none selected or no settings
-    if (availableInversions.length === 0) {
-      availableInversions = Object.keys(randomChord.notes);
-    }
-    
+    const availableInversions = Object.keys(randomChord.notes);
     const randomInversion = availableInversions[Math.floor(Math.random() * availableInversions.length)];
     
     setCurrentChord(randomChord);

@@ -1,47 +1,7 @@
-export const chords = [
-  { 
-    name: 'C', 
-    notes: {
-      root: ['C4', 'E4', 'G4'],
-      first: ['E4', 'G4', 'C5'],
-      second: ['G4', 'C5', 'E5']
-    }
-  },
-  { 
-    name: 'Cm', 
-    notes: {
-      root: ['C4', 'D#4', 'G4'],
-      first: ['D#4', 'G4', 'C5'],
-      second: ['G4', 'C5', 'D#5']
-    }
-  },
-  { 
-    name: 'C7', 
-    notes: {
-      root: ['C4', 'E4', 'G4', 'A#4'],
-      first: ['E4', 'G4', 'A#4', 'C5'],
-      second: ['G4', 'A#4', 'C5', 'E5'],
-      third: ['A#4', 'C5', 'E5', 'G5']
-    }
-  },
-  { 
-    name: 'Cmaj7', 
-    notes: {
-      root: ['C4', 'E4', 'G4', 'B4'],
-      first: ['E4', 'G4', 'B4', 'C5'],
-      second: ['G4', 'B4', 'C5', 'E5'],
-      third: ['B4', 'C5', 'E5', 'G5']
-    }
-  },
-  { 
-    name: 'Cdim', 
-    notes: {
-      root: ['C4', 'D#4', 'F#4'],
-      first: ['D#4', 'F#4', 'C5'],
-      second: ['F#4', 'C5', 'D#5']
-    }
-  },
-];
+import { generateAllChords } from './chordGenerator';
+
+// Generate all chords for all keys
+export const chords = generateAllChords();
 
 export const notes = [
   { note: 'C4', freq: 261.63, type: 'white' },
