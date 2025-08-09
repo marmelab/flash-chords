@@ -5,60 +5,43 @@ import { diatonicChords } from '../data/diatonicChords';
  * Generates a deck of chord-inversion pairs based on user settings
  * @param {Object} settings - User settings for the exercise
  * @param {Object} settings.inversions - Which inversions to include
- * @param {string} settings.selectedKey - The key to filter chords ('all' or specific key)
- * @param {string} settings.chordType - Type of chords ('major-triads', 'major-sevenths', 'minor-triads', 'minor-sevenths')
+ * @param {Array} settings.selectedKeys - Array of selected keys
+ * @param {Array} settings.selectedChordTypes - Array of chord types ('major-triads', 'major-sevenths', 'minor-triads', 'minor-sevenths')
  * @returns {Array} Array of chord-inversion objects for the exercise
  */
 export const generateChordDeck = (settings) => {
-  const { inversions, selectedKey = 'all', chordType = 'major-triads' } = settings;
+  const { inversions, selectedKeys = ['C'], selectedChordTypes = ['major-triads'] } = settings;
   
-  // Filter chords based on selected key and chord type
-  let filteredChords = chords;
+  // Collect all chord names from selected keys and chord types
+  const allChordNames = new Set();
   
-  // Determine if we're using major or minor key
-  const isMinor = chordType.includes('minor');
-  const isSevenths = chordType.includes('sevenths');
-  
-  if (selectedKey !== 'all') {
-    // Get the appropriate key name (add 'm' for minor keys)
-    const keyName = isMinor ? selectedKey + 'm' : selectedKey;
-    const keyChords = diatonicChords[keyName];
+  selectedChordTypes.forEach(chordType => {
+    // Determine if we're using major or minor key
+    const isMinor = chordType.includes('minor');
+    const isSevenths = chordType.includes('sevenths');
     
-    if (keyChords) {
-      const chordNames = isSevenths ? keyChords.sevenths : keyChords.triads;
-      if (chordNames) {
-        // Filter to only include chords that match the diatonic chord names
-        filteredChords = chords.filter(chord => 
-          chordNames.includes(chord.name)
-        );
+    selectedKeys.forEach(key => {
+      // Get the appropriate key name (add 'm' for minor keys)
+      const keyName = isMinor ? key + 'm' : key;
+      const keyChords = diatonicChords[keyName];
+      
+      if (keyChords) {
+        const chordNames = isSevenths ? keyChords.sevenths : keyChords.triads;
+        if (chordNames) {
+          chordNames.forEach(name => allChordNames.add(name));
+        }
       }
-    }
-  } else {
-    // If all keys, filter by chord type
-    if (chordType === 'major-triads') {
-      // Include only major, diminished triads (diatonic to major keys)
-      filteredChords = chords.filter(chord => 
-        !chord.name.includes('7') && 
-        (!chord.name.includes('m') || chord.name.includes('dim'))
-      );
-    } else if (chordType === 'major-sevenths') {
-      // Include maj7, dom7, m7, m7b5 (diatonic to major keys)
-      filteredChords = chords.filter(chord => 
-        chord.name.includes('maj7') || 
-        chord.name.includes('m7') || 
-        (chord.name.includes('7') && !chord.name.includes('dim7'))
-      );
-    } else if (chordType === 'minor-triads') {
-      // Include minor, major, diminished triads (diatonic to minor keys)
-      filteredChords = chords.filter(chord => 
-        !chord.name.includes('7')
-      );
-    } else if (chordType === 'minor-sevenths') {
-      // Include all 7th chords (diatonic to minor keys)
-      filteredChords = chords.filter(chord => 
-        chord.name.includes('7')
-      );
-    }
+    });
+  });
+  
+  // Filter chords based on collected chord names
+  let filteredChords = chords.filter(chord => 
+    allChordNames.has(chord.name)
+  );
+  
+  // If no keys selected or no chords found, return empty array
+  if (filteredChords.length === 0) {
+    return [];
   }
   
   // Create all possible chord-inversion combinations

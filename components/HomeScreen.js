@@ -11,27 +11,37 @@ import {
 import { keyOptions } from '../data/diatonicChords';
 
 const HomeScreen = ({ onStartExercise }) => {
-  const [includeRoot, setIncludeRoot] = useState(true);
-  const [includeFirst, setIncludeFirst] = useState(true);
-  const [includeSecond, setIncludeSecond] = useState(true);
-  const [selectedKey, setSelectedKey] = useState('all');
-  const [chordType, setChordType] = useState('major-triads'); // 'major-triads', 'major-sevenths', 'minor-triads', 'minor-sevenths'
+  const [selectedInversions, setSelectedInversions] = useState(['root']); // Multiple selection, default to root
+  const [selectedKeys, setSelectedKeys] = useState(['C']); // Multiple selection, default to C
+  const [selectedChordTypes, setSelectedChordTypes] = useState(['major-triads']); // Multiple selection, default to major triads
 
   const handleStart = () => {
     // Validate that at least one inversion is selected
-    if (!includeRoot && !includeFirst && !includeSecond) {
+    if (selectedInversions.length === 0) {
       alert('Please select at least one inversion type');
+      return;
+    }
+    
+    // Validate that at least one key is selected
+    if (selectedKeys.length === 0) {
+      alert('Please select at least one key');
+      return;
+    }
+    
+    // Validate that at least one chord type is selected
+    if (selectedChordTypes.length === 0) {
+      alert('Please select at least one chord type');
       return;
     }
 
     const settings = {
       inversions: {
-        root: includeRoot,
-        first: includeFirst,
-        second: includeSecond,
+        root: selectedInversions.includes('root'),
+        first: selectedInversions.includes('first'),
+        second: selectedInversions.includes('second'),
       },
-      selectedKey,
-      chordType,
+      selectedKeys,
+      selectedChordTypes,
     };
 
     onStartExercise(settings);
@@ -46,131 +56,115 @@ const HomeScreen = ({ onStartExercise }) => {
 
       <View style={styles.settingsContainer}>
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Inversions to Include</Text>
-          
-          <View style={styles.switchRow}>
-            <Text style={styles.switchLabel}>Root Position</Text>
-            <Switch
-              value={includeRoot}
-              onValueChange={setIncludeRoot}
-              trackColor={{ false: '#767577', true: '#81b0ff' }}
-              thumbColor={includeRoot ? '#3498db' : '#f4f3f4'}
-            />
-          </View>
-
-          <View style={styles.switchRow}>
-            <Text style={styles.switchLabel}>1st Inversion</Text>
-            <Switch
-              value={includeFirst}
-              onValueChange={setIncludeFirst}
-              trackColor={{ false: '#767577', true: '#81b0ff' }}
-              thumbColor={includeFirst ? '#3498db' : '#f4f3f4'}
-            />
-          </View>
-
-          <View style={styles.switchRow}>
-            <Text style={styles.switchLabel}>2nd Inversion</Text>
-            <Switch
-              value={includeSecond}
-              onValueChange={setIncludeSecond}
-              trackColor={{ false: '#767577', true: '#81b0ff' }}
-              thumbColor={includeSecond ? '#3498db' : '#f4f3f4'}
-            />
-          </View>
-        </View>
-
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Key Selection</Text>
+          <Text style={styles.sectionTitle}>Keys</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.keySelector}>
-            {keyOptions.map((key) => (
-              <TouchableOpacity
-                key={key.value}
-                style={[
-                  styles.keyButton,
-                  selectedKey === key.value && styles.selectedKeyButton,
-                ]}
-                onPress={() => setSelectedKey(key.value)}
-              >
-                <Text
+            {keyOptions.map((key) => {
+              const isSelected = selectedKeys.includes(key.value);
+              return (
+                <TouchableOpacity
+                  key={key.value}
                   style={[
-                    styles.keyButtonText,
-                    selectedKey === key.value && styles.selectedKeyButtonText,
+                    styles.keyButton,
+                    isSelected && styles.selectedKeyButton,
                   ]}
+                  onPress={() => {
+                    if (isSelected) {
+                      // Remove key if already selected
+                      setSelectedKeys(selectedKeys.filter(k => k !== key.value));
+                    } else {
+                      // Add key if not selected
+                      setSelectedKeys([...selectedKeys, key.value]);
+                    }
+                  }}
                 >
-                  {key.label}
-                </Text>
-              </TouchableOpacity>
-            ))}
+                  <Text
+                    style={[
+                      styles.keyButtonText,
+                      isSelected && styles.selectedKeyButtonText,
+                    ]}
+                  >
+                    {key.label}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
           </ScrollView>
         </View>
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Chord Types</Text>
-          <View style={styles.chordTypeGrid}>
-            <TouchableOpacity
-              style={[
-                styles.chordTypeButton,
-                chordType === 'major-triads' && styles.selectedChordTypeButton,
-              ]}
-              onPress={() => setChordType('major-triads')}
-            >
-              <Text
-                style={[
-                  styles.chordTypeButtonText,
-                  chordType === 'major-triads' && styles.selectedChordTypeButtonText,
-                ]}
-              >
-                Major Triads
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[
-                styles.chordTypeButton,
-                chordType === 'major-sevenths' && styles.selectedChordTypeButton,
-              ]}
-              onPress={() => setChordType('major-sevenths')}
-            >
-              <Text
-                style={[
-                  styles.chordTypeButtonText,
-                  chordType === 'major-sevenths' && styles.selectedChordTypeButtonText,
-                ]}
-              >
-                Major 7ths
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[
-                styles.chordTypeButton,
-                chordType === 'minor-triads' && styles.selectedChordTypeButton,
-              ]}
-              onPress={() => setChordType('minor-triads')}
-            >
-              <Text
-                style={[
-                  styles.chordTypeButtonText,
-                  chordType === 'minor-triads' && styles.selectedChordTypeButtonText,
-                ]}
-              >
-                Minor Triads
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[
-                styles.chordTypeButton,
-                chordType === 'minor-sevenths' && styles.selectedChordTypeButton,
-              ]}
-              onPress={() => setChordType('minor-sevenths')}
-            >
-              <Text
-                style={[
-                  styles.chordTypeButtonText,
-                  chordType === 'minor-sevenths' && styles.selectedChordTypeButtonText,
-                ]}
-              >
-                Minor 7ths
-              </Text>
-            </TouchableOpacity>
+          <View style={styles.chipContainer}>
+            {[
+              { label: 'Major Triads', value: 'major-triads' },
+              { label: 'Major 7ths', value: 'major-sevenths' },
+              { label: 'Minor Triads', value: 'minor-triads' },
+              { label: 'Minor 7ths', value: 'minor-sevenths' },
+            ].map((chordType) => {
+              const isSelected = selectedChordTypes.includes(chordType.value);
+              return (
+                <TouchableOpacity
+                  key={chordType.value}
+                  style={[
+                    styles.chip,
+                    isSelected && styles.selectedChip,
+                  ]}
+                  onPress={() => {
+                    if (isSelected) {
+                      setSelectedChordTypes(selectedChordTypes.filter(t => t !== chordType.value));
+                    } else {
+                      setSelectedChordTypes([...selectedChordTypes, chordType.value]);
+                    }
+                  }}
+                >
+                  <Text
+                    style={[
+                      styles.chipText,
+                      isSelected && styles.selectedChipText,
+                    ]}
+                  >
+                    {chordType.label}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Inversions</Text>
+          <View style={styles.chipContainer}>
+            {[
+              { label: 'Root', value: 'root' },
+              { label: '1st', value: 'first' },
+              { label: '2nd', value: 'second' },
+            ].map((inversion) => {
+              const isSelected = selectedInversions.includes(inversion.value);
+              return (
+                <TouchableOpacity
+                  key={inversion.value}
+                  style={[
+                    styles.chip,
+                    isSelected && styles.selectedChip,
+                  ]}
+                  onPress={() => {
+                    if (isSelected) {
+                      setSelectedInversions(selectedInversions.filter(i => i !== inversion.value));
+                    } else {
+                      setSelectedInversions([...selectedInversions, inversion.value]);
+                    }
+                  }}
+                >
+                  <Text
+                    style={[
+                      styles.chipText,
+                      isSelected && styles.selectedChipText,
+                    ]}
+                  >
+                    {inversion.label}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
           </View>
         </View>
       </View>
@@ -220,17 +214,33 @@ const styles = StyleSheet.create({
     color: 'white',
     marginBottom: 15,
   },
-  switchRow: {
+  chipContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+    flexWrap: 'wrap',
+    marginTop: 10,
   },
-  switchLabel: {
-    fontSize: 16,
+  chip: {
+    paddingHorizontal: 15,
+    paddingVertical: 8,
+    marginRight: 10,
+    marginBottom: 10,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+  },
+  selectedChip: {
+    backgroundColor: '#3498db',
+    borderColor: '#3498db',
+  },
+  chipText: {
     color: '#ecf0f1',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  selectedChipText: {
+    color: 'white',
+    fontWeight: '600',
   },
   startButton: {
     backgroundColor: '#27ae60',
@@ -248,13 +258,15 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   keyButton: {
-    paddingHorizontal: 15,
+    minWidth: 60,
+    paddingHorizontal: 12,
     paddingVertical: 8,
     marginHorizontal: 5,
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
     borderRadius: 20,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.2)',
+    alignItems: 'center',
   },
   selectedKeyButton: {
     backgroundColor: '#3498db',
@@ -263,40 +275,11 @@ const styles = StyleSheet.create({
   keyButtonText: {
     color: '#ecf0f1',
     fontSize: 14,
-    fontWeight: '500',
+    fontWeight: '600',
   },
   selectedKeyButtonText: {
     color: 'white',
-    fontWeight: 'bold',
-  },
-  chordTypeGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    marginTop: 10,
-  },
-  chordTypeButton: {
-    width: '48%',
-    paddingVertical: 12,
-    marginBottom: 10,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
-    alignItems: 'center',
-  },
-  selectedChordTypeButton: {
-    backgroundColor: '#3498db',
-    borderColor: '#3498db',
-  },
-  chordTypeButtonText: {
-    color: '#ecf0f1',
-    fontSize: 16,
-    fontWeight: '500',
-  },
-  selectedChordTypeButtonText: {
-    color: 'white',
-    fontWeight: 'bold',
+    fontWeight: '600',
   },
 });
 

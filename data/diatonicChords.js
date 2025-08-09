@@ -142,7 +142,6 @@ export const diatonicChords = {
 };
 
 export const keyOptions = [
-  { label: 'All', value: 'all' },
   { label: 'C', value: 'C' },
   { label: 'C#/Db', value: 'C#' },
   { label: 'D', value: 'D' },
