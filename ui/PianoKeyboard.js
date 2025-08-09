@@ -2,10 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import PianoKey from './PianoKey';
 import ChordControls from './ChordControls';
-import { chords, notes, getInversionName } from '../data/chords';
-import { initAudio, playTone } from '../utils/audio';
-import { validateChord, getKeyStyle as getKeyStyleUtil } from '../utils/chordValidation';
-import { selectRandomFromDeck } from '../utils/deckGenerator';
+import { notes, getInversionName } from '../data/chords';
+import { initAudio, playTone } from '../logic/audio';
+import { generateNewChord, checkAnswer, getKeyStyleForNote } from '../logic/practiceLogic';
 
 const PianoKeyboard = ({ settings, chordDeck, onGoBack }) => {
   const [selectedKeys, setSelectedKeys] = useState(new Set());
@@ -17,31 +16,13 @@ const PianoKeyboard = ({ settings, chordDeck, onGoBack }) => {
 
   useEffect(() => {
     initAudio();
-    generateNewChord();
+    handleGenerateNewChord();
   }, []);
 
-  const generateNewChord = () => {
-    // If we have a deck, select from it; otherwise fall back to all chords
-    if (chordDeck && chordDeck.length > 0) {
-      const selectedChordData = selectRandomFromDeck(chordDeck);
-      
-      if (selectedChordData) {
-        setCurrentChord(selectedChordData.chord);
-        setCurrentInversion(selectedChordData.inversion);
-        setSelectedKeys(new Set());
-        setShowResult(false);
-        setIsCorrect(null);
-        return;
-      }
-    }
-    
-    // Fallback: select from all chords (shouldn't happen with proper deck)
-    const randomChord = chords[Math.floor(Math.random() * chords.length)];
-    const availableInversions = Object.keys(randomChord.notes);
-    const randomInversion = availableInversions[Math.floor(Math.random() * availableInversions.length)];
-    
-    setCurrentChord(randomChord);
-    setCurrentInversion(randomInversion);
+  const handleGenerateNewChord = () => {
+    const { chord, inversion } = generateNewChord(chordDeck);
+    setCurrentChord(chord);
+    setCurrentInversion(inversion);
     setSelectedKeys(new Set());
     setShowResult(false);
     setIsCorrect(null);
@@ -63,29 +44,25 @@ const PianoKeyboard = ({ settings, chordDeck, onGoBack }) => {
     setSelectedKeys(newSelectedKeys);
   };
 
-  const checkAnswer = () => {
-    if (!currentChord || !currentInversion) return;
-    
-    const selectedArray = Array.from(selectedKeys);
-    const correctArray = [...currentChord.notes[currentInversion]];
-    
-    const isAnswerCorrect = validateChord(selectedArray, correctArray);
+  const handleCheckAnswer = () => {
+    const isAnswerCorrect = checkAnswer(selectedKeys, currentChord, currentInversion);
     
     setIsCorrect(isAnswerCorrect);
     setShowResult(true);
     
     if (isAnswerCorrect) {
       setTimeout(() => {
-        generateNewChord();
+        handleGenerateNewChord();
       }, 1500);
     }
   };
 
   const getKeyStyle = (note) => {
-    return getKeyStyleUtil(
+    return getKeyStyleForNote(
       note,
       selectedKeys,
-      currentChord?.notes[currentInversion] || [],
+      currentChord,
+      currentInversion,
       showResult,
       isCorrect
     );
@@ -196,8 +173,8 @@ const PianoKeyboard = ({ settings, chordDeck, onGoBack }) => {
       <ChordControls
         showResult={showResult}
         isCorrect={isCorrect}
-        onSubmit={checkAnswer}
-        onNewChord={generateNewChord}
+        onSubmit={handleCheckAnswer}
+        onNewChord={handleGenerateNewChord}
       />
     </View>
   );

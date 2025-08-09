@@ -1,4 +1,4 @@
-import { removeOctave, validateChord, getKeyStyle } from "../chordValidation";
+import { removeOctave, validateChord, getKeyStyle } from "../../logic/chordValidation";
 
 describe("removeOctave", () => {
   test("removes octave from simple notes", () => {

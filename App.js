@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, View } from 'react-native';
-import HomeScreen from './components/HomeScreen';
-import PianoKeyboard from './components/PianoKeyboard';
-import { generateChordDeck } from './utils/deckGenerator';
+import HomeScreen from './ui/HomeScreen';
+import PianoKeyboard from './ui/PianoKeyboard';
+import { generateChordDeck } from './logic/deckGenerator';
 
 export default function App() {
   const [currentScreen, setCurrentScreen] = useState('home');

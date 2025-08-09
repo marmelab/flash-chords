@@ -1,7 +1,7 @@
 import { Audio } from 'expo-av';
 
-export const initAudio = async () => {
-  await Audio.setAudioModeAsync({
+export const initAudio = () => {
+  return Audio.setAudioModeAsync({
     allowsRecordingIOS: false,
     playsInSilentModeIOS: true,
     shouldDuckAndroid: true,
@@ -48,17 +48,15 @@ const generateTone = (frequency) => {
   return btoa(binary);
 };
 
-export const playTone = async (frequency) => {
-  try {
-    const { sound } = await Audio.Sound.createAsync(
-      { uri: `data:audio/wav;base64,${generateTone(frequency)}` },
-      { shouldPlay: true }
-    );
-    
-    setTimeout(async () => {
-      await sound.unloadAsync();
+export const playTone = (frequency) => {
+  Audio.Sound.createAsync(
+    { uri: `data:audio/wav;base64,${generateTone(frequency)}` },
+    { shouldPlay: true }
+  ).then(({ sound }) => {
+    setTimeout(() => {
+      sound.unloadAsync();
     }, 500);
-  } catch (error) {
+  }).catch(error => {
     console.log('Error playing sound:', error);
-  }
+  });
 };
