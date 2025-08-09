@@ -9,40 +9,71 @@ import {
   ScrollView,
   SafeAreaView,
 } from 'react-native';
-import { keyOptions } from '../data/diatonicChords';
+// Generate all 24 key options (12 major + 12 minor)
+// Using the most common enharmonic spellings
+const keyOptions = [
+  // Major keys
+  { value: 'C', label: 'C' },
+  { value: 'Db', label: 'Db' },
+  { value: 'D', label: 'D' },
+  { value: 'Eb', label: 'Eb' },
+  { value: 'E', label: 'E' },
+  { value: 'F', label: 'F' },
+  { value: 'F#', label: 'F#' },
+  { value: 'G', label: 'G' },
+  { value: 'Ab', label: 'Ab' },
+  { value: 'A', label: 'A' },
+  { value: 'Bb', label: 'Bb' },
+  { value: 'B', label: 'B' },
+  // Minor keys
+  { value: 'Cm', label: 'Cm' },
+  { value: 'C#m', label: 'C#m' },
+  { value: 'Dm', label: 'Dm' },
+  { value: 'Ebm', label: 'Ebm' },
+  { value: 'Em', label: 'Em' },
+  { value: 'Fm', label: 'Fm' },
+  { value: 'F#m', label: 'F#m' },
+  { value: 'Gm', label: 'Gm' },
+  { value: 'G#m', label: 'G#m' },
+  { value: 'Am', label: 'Am' },
+  { value: 'Bbm', label: 'Bbm' },
+  { value: 'Bm', label: 'Bm' },
+];
 
 const HomeScreen = ({ onStartExercise }) => {
+  const [selectedKeys, setSelectedKeys] = useState(['C']); // Multiple selection, default to C major
+  const [selectedQualities, setSelectedQualities] = useState(['major', 'minor', 'diminished', 'dominant']); // Chord qualities
+  const [selectedExtensions, setSelectedExtensions] = useState(['triads']); // triads or sevenths
   const [selectedInversions, setSelectedInversions] = useState(['root']); // Multiple selection, default to root
-  const [selectedKeys, setSelectedKeys] = useState(['C']); // Multiple selection, default to C
-  const [selectedChordTypes, setSelectedChordTypes] = useState(['major-triads']); // Multiple selection, default to major triads
 
   const handleStart = () => {
-    // Validate that at least one inversion is selected
-    if (selectedInversions.length === 0) {
-      alert('Please select at least one inversion type');
-      return;
-    }
-    
-    // Validate that at least one key is selected
+    // Validate selections
     if (selectedKeys.length === 0) {
       alert('Please select at least one key');
       return;
     }
-    
-    // Validate that at least one chord type is selected
-    if (selectedChordTypes.length === 0) {
-      alert('Please select at least one chord type');
+    if (selectedQualities.length === 0) {
+      alert('Please select at least one chord quality');
+      return;
+    }
+    if (selectedExtensions.length === 0) {
+      alert('Please select triads or 7ths');
+      return;
+    }
+    if (selectedInversions.length === 0) {
+      alert('Please select at least one inversion');
       return;
     }
 
     const settings = {
+      selectedKeys,
+      selectedQualities,
+      selectedExtensions,
       inversions: {
         root: selectedInversions.includes('root'),
         first: selectedInversions.includes('first'),
         second: selectedInversions.includes('second'),
       },
-      selectedKeys,
-      selectedChordTypes,
     };
 
     onStartExercise(settings);
@@ -60,7 +91,39 @@ const HomeScreen = ({ onStartExercise }) => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Keys</Text>
           <View style={styles.keyContainer}>
-            {keyOptions.map((key) => {
+            {keyOptions.slice(0, 12).map((key) => {
+              const isSelected = selectedKeys.includes(key.value);
+              return (
+                <TouchableOpacity
+                  key={key.value}
+                  style={[
+                    styles.keyButton,
+                    isSelected && styles.selectedKeyButton,
+                  ]}
+                  onPress={() => {
+                    if (isSelected) {
+                      // Remove key if already selected
+                      setSelectedKeys(selectedKeys.filter(k => k !== key.value));
+                    } else {
+                      // Add key if not selected
+                      setSelectedKeys([...selectedKeys, key.value]);
+                    }
+                  }}
+                >
+                  <Text
+                    style={[
+                      styles.keyButtonText,
+                      isSelected && styles.selectedKeyButtonText,
+                    ]}
+                  >
+                    {key.label}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+          <View style={styles.keyContainer}>
+            {keyOptions.slice(12).map((key) => {
               const isSelected = selectedKeys.includes(key.value);
               return (
                 <TouchableOpacity
@@ -94,27 +157,27 @@ const HomeScreen = ({ onStartExercise }) => {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Chord Types</Text>
+          <Text style={styles.sectionTitle}>Chord Qualities</Text>
           <View style={styles.chipContainer}>
             {[
-              { label: 'Major Triads', value: 'major-triads' },
-              { label: 'Major 7ths', value: 'major-sevenths' },
-              { label: 'Minor Triads', value: 'minor-triads' },
-              { label: 'Minor 7ths', value: 'minor-sevenths' },
-            ].map((chordType) => {
-              const isSelected = selectedChordTypes.includes(chordType.value);
+              { label: 'Major', value: 'major' },
+              { label: 'Minor', value: 'minor' },
+              { label: 'Diminished', value: 'diminished' },
+              { label: 'Dominant', value: 'dominant' },
+            ].map((quality) => {
+              const isSelected = selectedQualities.includes(quality.value);
               return (
                 <TouchableOpacity
-                  key={chordType.value}
+                  key={quality.value}
                   style={[
                     styles.chip,
                     isSelected && styles.selectedChip,
                   ]}
                   onPress={() => {
                     if (isSelected) {
-                      setSelectedChordTypes(selectedChordTypes.filter(t => t !== chordType.value));
+                      setSelectedQualities(selectedQualities.filter(q => q !== quality.value));
                     } else {
-                      setSelectedChordTypes([...selectedChordTypes, chordType.value]);
+                      setSelectedQualities([...selectedQualities, quality.value]);
                     }
                   }}
                 >
@@ -124,7 +187,44 @@ const HomeScreen = ({ onStartExercise }) => {
                       isSelected && styles.selectedChipText,
                     ]}
                   >
-                    {chordType.label}
+                    {quality.label}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Extensions</Text>
+          <View style={styles.chipContainer}>
+            {[
+              { label: 'Triads', value: 'triads' },
+              { label: '7ths', value: 'sevenths' },
+            ].map((extension) => {
+              const isSelected = selectedExtensions.includes(extension.value);
+              return (
+                <TouchableOpacity
+                  key={extension.value}
+                  style={[
+                    styles.chip,
+                    isSelected && styles.selectedChip,
+                  ]}
+                  onPress={() => {
+                    if (isSelected) {
+                      setSelectedExtensions(selectedExtensions.filter(e => e !== extension.value));
+                    } else {
+                      setSelectedExtensions([...selectedExtensions, extension.value]);
+                    }
+                  }}
+                >
+                  <Text
+                    style={[
+                      styles.chipText,
+                      isSelected && styles.selectedChipText,
+                    ]}
+                  >
+                    {extension.label}
                   </Text>
                 </TouchableOpacity>
               );

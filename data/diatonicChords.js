@@ -38,8 +38,8 @@ export const diatonicChords = {
     sevenths: ['C#maj7', 'D#m7', 'E#m7', 'F#maj7', 'G#7', 'A#m7', 'B#m7b5']
   },
   'F': {
-    triads: ['F', 'Gm', 'Am', 'A#', 'C', 'Dm', 'Edim'],
-    sevenths: ['Fmaj7', 'Gm7', 'Am7', 'A#maj7', 'C7', 'Dm7', 'Em7b5']
+    triads: ['F', 'Gm', 'Am', 'Bb', 'C', 'Dm', 'Edim'],
+    sevenths: ['Fmaj7', 'Gm7', 'Am7', 'Bbmaj7', 'C7', 'Dm7', 'Em7b5']
   },
   'A#': {  // Bb
     triads: ['A#', 'Cm', 'Dm', 'D#', 'F', 'Gm', 'Adim'],
@@ -55,24 +55,24 @@ export const diatonicChords = {
   },
   // Add flat key aliases for user convenience
   'Db': {
-    triads: ['C#', 'D#m', 'Fm', 'F#', 'G#', 'A#m', 'Cdim'],
-    sevenths: ['C#maj7', 'D#m7', 'Fm7', 'F#maj7', 'G#7', 'A#m7', 'Cm7b5']
+    triads: ['Db', 'Ebm', 'Fm', 'Gb', 'Ab', 'Bbm', 'Cdim'],
+    sevenths: ['Dbmaj7', 'Ebm7', 'Fm7', 'Gbmaj7', 'Ab7', 'Bbm7', 'Cm7b5']
   },
   'Gb': {
-    triads: ['F#', 'G#m', 'A#m', 'B', 'C#', 'D#m', 'Fdim'],
-    sevenths: ['F#maj7', 'G#m7', 'A#m7', 'Bmaj7', 'C#7', 'D#m7', 'Fm7b5']
+    triads: ['Gb', 'Abm', 'Bbm', 'Cb', 'Db', 'Ebm', 'Fdim'],
+    sevenths: ['Gbmaj7', 'Abm7', 'Bbm7', 'Cbmaj7', 'Db7', 'Ebm7', 'Fm7b5']
   },
   'Bb': {
-    triads: ['A#', 'Cm', 'Dm', 'D#', 'F', 'Gm', 'Adim'],
-    sevenths: ['A#maj7', 'Cm7', 'Dm7', 'D#maj7', 'F7', 'Gm7', 'Am7b5']
+    triads: ['Bb', 'Cm', 'Dm', 'Eb', 'F', 'Gm', 'Adim'],
+    sevenths: ['Bbmaj7', 'Cm7', 'Dm7', 'Ebmaj7', 'F7', 'Gm7', 'Am7b5']
   },
   'Eb': {
-    triads: ['D#', 'Fm', 'Gm', 'G#', 'A#', 'Cm', 'Ddim'],
-    sevenths: ['D#maj7', 'Fm7', 'Gm7', 'G#maj7', 'A#7', 'Cm7', 'Dm7b5']
+    triads: ['Eb', 'Fm', 'Gm', 'Ab', 'Bb', 'Cm', 'Ddim'],
+    sevenths: ['Ebmaj7', 'Fm7', 'Gm7', 'Abmaj7', 'Bb7', 'Cm7', 'Dm7b5']
   },
   'Ab': {
-    triads: ['G#', 'A#m', 'Cm', 'C#', 'D#', 'Fm', 'Gdim'],
-    sevenths: ['G#maj7', 'A#m7', 'Cm7', 'C#maj7', 'D#7', 'Fm7', 'Gm7b5']
+    triads: ['Ab', 'Bbm', 'Cm', 'Db', 'Eb', 'Fm', 'Gdim'],
+    sevenths: ['Abmaj7', 'Bbm7', 'Cm7', 'Dbmaj7', 'Eb7', 'Fm7', 'Gm7b5']
   },
   
   // Natural minor keys (using relative major's key signature)
@@ -109,29 +109,29 @@ export const diatonicChords = {
     sevenths: ['A#m7', 'B#m7b5', 'C#maj7', 'D#m7', 'E#m7', 'F#maj7', 'G#7']
   },
   'Dm': {  // Relative to F major
-    triads: ['Dm', 'Edim', 'F', 'Gm', 'Am', 'A#', 'C'],
-    sevenths: ['Dm7', 'Em7b5', 'Fmaj7', 'Gm7', 'Am7', 'A#maj7', 'C7']
+    triads: ['Dm', 'Edim', 'F', 'Gm', 'Am', 'Bb', 'C'],
+    sevenths: ['Dm7', 'Em7b5', 'Fmaj7', 'Gm7', 'Am7', 'Bbmaj7', 'C7']
   },
   'Gm': {  // Relative to Bb major
-    triads: ['Gm', 'Adim', 'A#', 'Cm', 'Dm', 'D#', 'F'],
-    sevenths: ['Gm7', 'Am7b5', 'A#maj7', 'Cm7', 'Dm7', 'D#maj7', 'F7']
+    triads: ['Gm', 'Adim', 'Bb', 'Cm', 'Dm', 'Eb', 'F'],
+    sevenths: ['Gm7', 'Am7b5', 'Bbmaj7', 'Cm7', 'Dm7', 'Ebmaj7', 'F7']
   },
   'Cm': {  // Relative to Eb major
-    triads: ['Cm', 'Ddim', 'D#', 'Fm', 'Gm', 'G#', 'A#'],
-    sevenths: ['Cm7', 'Dm7b5', 'D#maj7', 'Fm7', 'Gm7', 'G#maj7', 'A#7']
+    triads: ['Cm', 'Ddim', 'Eb', 'Fm', 'Gm', 'Ab', 'Bb'],
+    sevenths: ['Cm7', 'Dm7b5', 'Ebmaj7', 'Fm7', 'Gm7', 'Abmaj7', 'Bb7']
   },
   'Fm': {  // Relative to Ab major
-    triads: ['Fm', 'Gdim', 'G#', 'A#m', 'Cm', 'C#', 'D#'],
-    sevenths: ['Fm7', 'Gm7b5', 'G#maj7', 'A#m7', 'Cm7', 'C#maj7', 'D#7']
+    triads: ['Fm', 'Gdim', 'Ab', 'Bbm', 'Cm', 'Db', 'Eb'],
+    sevenths: ['Fm7', 'Gm7b5', 'Abmaj7', 'Bbm7', 'Cm7', 'Dbmaj7', 'Eb7']
   },
   // Missing minor key aliases that map to existing enharmonics
-  'Ebm': {  // Same as D#m
-    triads: ['D#m', 'E#dim', 'F#', 'G#m', 'A#m', 'B', 'C#'],
-    sevenths: ['D#m7', 'E#m7b5', 'F#maj7', 'G#m7', 'A#m7', 'Bmaj7', 'C#7']
+  'Ebm': {  // Relative to Gb major
+    triads: ['Ebm', 'Fdim', 'Gb', 'Abm', 'Bbm', 'Cb', 'Db'],
+    sevenths: ['Ebm7', 'Fm7b5', 'Gbmaj7', 'Abm7', 'Bbm7', 'Cbmaj7', 'Db7']
   },
-  'Bbm': {  // Same as A#m
-    triads: ['A#m', 'B#dim', 'C#', 'D#m', 'E#m', 'F#', 'G#'],
-    sevenths: ['A#m7', 'B#m7b5', 'C#maj7', 'D#m7', 'E#m7', 'F#maj7', 'G#7']
+  'Bbm': {  // Relative to Db major
+    triads: ['Bbm', 'Cdim', 'Db', 'Ebm', 'Fm', 'Gb', 'Ab'],
+    sevenths: ['Bbm7', 'Cm7b5', 'Dbmaj7', 'Ebm7', 'Fm7', 'Gbmaj7', 'Ab7']
   },
   
   // "All keys" option

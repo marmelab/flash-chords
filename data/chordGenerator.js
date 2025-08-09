@@ -4,12 +4,33 @@
 
 const noteOrder = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
 
+// Map of enharmonic equivalents
+const enharmonicMap = {
+  'C#': 'Db',
+  'D#': 'Eb',
+  'F#': 'Gb',
+  'G#': 'Ab',
+  'A#': 'Bb',
+  'Db': 'C#',
+  'Eb': 'D#',
+  'Gb': 'F#',
+  'Ab': 'G#',
+  'Bb': 'A#',
+  'Cb': 'B',
+  'B': 'Cb'
+};
+
 /**
  * Get the note that is a certain number of semitones from the root
  */
 const getNoteAtInterval = (root, semitones) => {
-  const rootNote = root.replace(/[0-9]/g, '');
+  let rootNote = root.replace(/[0-9]/g, '');
   const octave = parseInt(root.match(/[0-9]/)?.[0] || '4');
+  
+  // Convert flat notes to sharp equivalents for calculation
+  if (enharmonicMap[rootNote] && rootNote.includes('b')) {
+    rootNote = enharmonicMap[rootNote];
+  }
   
   const rootIndex = noteOrder.indexOf(rootNote);
   if (rootIndex === -1) return null;
@@ -273,56 +294,50 @@ const generateMin7b5Chord = (root) => {
 export const generateAllChords = () => {
   const allChords = [];
   
-  // For each of the 12 notes
+  // Helper function to add chord with enharmonic equivalent
+  const addChord = (name, notes) => {
+    allChords.push({ name, notes });
+    
+    // Add enharmonic equivalent if it exists
+    const rootNote = name.match(/^[A-G]#?b?/)?.[0];
+    if (rootNote && enharmonicMap[rootNote]) {
+      const enharmonicName = name.replace(rootNote, enharmonicMap[rootNote]);
+      allChords.push({ name: enharmonicName, notes });
+    }
+  };
+  
+  // For each of the 12 notes (sharps)
   noteOrder.forEach(root => {
     // Major chord
-    allChords.push({
-      name: root,
-      notes: generateMajorChord(root)
-    });
+    addChord(root, generateMajorChord(root));
     
     // Minor chord
-    allChords.push({
-      name: root + 'm',
-      notes: generateMinorChord(root)
-    });
+    addChord(root + 'm', generateMinorChord(root));
     
     // Dominant 7th
-    allChords.push({
-      name: root + '7',
-      notes: generateDom7Chord(root)
-    });
+    addChord(root + '7', generateDom7Chord(root));
     
     // Major 7th
-    allChords.push({
-      name: root + 'maj7',
-      notes: generateMaj7Chord(root)
-    });
+    addChord(root + 'maj7', generateMaj7Chord(root));
     
     // Diminished
-    allChords.push({
-      name: root + 'dim',
-      notes: generateDimChord(root)
-    });
+    addChord(root + 'dim', generateDimChord(root));
     
     // Minor 7th
-    allChords.push({
-      name: root + 'm7',
-      notes: generateMin7Chord(root)
-    });
+    addChord(root + 'm7', generateMin7Chord(root));
     
     // Diminished 7th
-    allChords.push({
-      name: root + 'dim7',
-      notes: generateDim7Chord(root)
-    });
+    addChord(root + 'dim7', generateDim7Chord(root));
     
     // Minor 7 flat 5 (half-diminished)
-    allChords.push({
-      name: root + 'm7b5',
-      notes: generateMin7b5Chord(root)
-    });
+    addChord(root + 'm7b5', generateMin7b5Chord(root));
   });
+  
+  // Also add Cb chords (which are B chords)
+  const cbNotes = generateMajorChord('B');
+  allChords.push({ name: 'Cb', notes: cbNotes });
+  allChords.push({ name: 'Cbmaj7', notes: generateMaj7Chord('B') });
+  allChords.push({ name: 'Cb7', notes: generateDom7Chord('B') });
   
   return allChords;
 };

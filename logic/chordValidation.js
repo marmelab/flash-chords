@@ -7,11 +7,11 @@ export const removeOctave = (note) => note.replace(/[0-9]/g, '');
 
 /**
  * Parses a note string into note name and octave
- * @param {string} noteStr - Note string like "C4" or "D#5"
+ * @param {string} noteStr - Note string like "C4" or "D#5" or "Bb4"
  * @returns {{note: string, octave: number}} Parsed note object
  */
 const parseNote = (noteStr) => {
-  const match = noteStr.match(/([A-G]#?)(\d)/);
+  const match = noteStr.match(/([A-G][#b]?)(\d)/);
   if (!match) return null;
   return { note: match[1], octave: parseInt(match[2]) };
 };
@@ -23,7 +23,20 @@ const parseNote = (noteStr) => {
  */
 const getNotePosition = (note) => {
   const noteOrder = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
-  return noteOrder.indexOf(note);
+  
+  // Map flat notes to their sharp equivalents
+  const flatToSharp = {
+    'Db': 'C#',
+    'Eb': 'D#',
+    'Gb': 'F#',
+    'Ab': 'G#',
+    'Bb': 'A#',
+    'Cb': 'B'
+  };
+  
+  // Convert flat to sharp if needed
+  const normalizedNote = flatToSharp[note] || note;
+  return noteOrder.indexOf(normalizedNote);
 };
 
 /**
@@ -64,9 +77,25 @@ export const validateChord = (selectedNotes, expectedNotes) => {
     return false;
   }
 
-  // Check if notes match in the same order (ignoring octave)
+  // Helper function to check if two notes are enharmonically equivalent
+  const areNotesEquivalent = (note1, note2) => {
+    if (note1 === note2) return true;
+    
+    const enharmonics = {
+      'C#': 'Db', 'Db': 'C#',
+      'D#': 'Eb', 'Eb': 'D#',
+      'F#': 'Gb', 'Gb': 'F#',
+      'G#': 'Ab', 'Ab': 'G#',
+      'A#': 'Bb', 'Bb': 'A#',
+      'B': 'Cb', 'Cb': 'B'
+    };
+    
+    return enharmonics[note1] === note2;
+  };
+  
+  // Check if notes match in the same order (ignoring octave, considering enharmonics)
   const notesMatchInOrder = selectedParsed.every((selected, index) => 
-    selected.note === expectedParsed[index].note
+    areNotesEquivalent(selected.note, expectedParsed[index].note)
   );
 
   if (!notesMatchInOrder) {
