@@ -7,6 +7,7 @@ import {
   Switch,
   Platform,
   ScrollView,
+  SafeAreaView,
 } from 'react-native';
 import { keyOptions } from '../data/diatonicChords';
 
@@ -48,16 +49,17 @@ const HomeScreen = ({ onStartExercise }) => {
   };
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Piano Chord Practice</Text>
-        <Text style={styles.subtitle}>Configure your exercise</Text>
-      </View>
+    <SafeAreaView style={styles.container}>
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        <View style={styles.header}>
+          <Text style={styles.title}>Piano Chord Practice</Text>
+          <Text style={styles.subtitle}>Configure your exercise</Text>
+        </View>
 
       <View style={styles.settingsContainer}>
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Keys</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.keySelector}>
+          <View style={styles.keyContainer}>
             {keyOptions.map((key) => {
               const isSelected = selectedKeys.includes(key.value);
               return (
@@ -88,7 +90,7 @@ const HomeScreen = ({ onStartExercise }) => {
                 </TouchableOpacity>
               );
             })}
-          </ScrollView>
+          </View>
         </View>
 
         <View style={styles.section}>
@@ -169,10 +171,11 @@ const HomeScreen = ({ onStartExercise }) => {
         </View>
       </View>
 
-      <TouchableOpacity style={styles.startButton} onPress={handleStart}>
-        <Text style={styles.startButtonText}>Start Practice</Text>
-      </TouchableOpacity>
-    </ScrollView>
+        <TouchableOpacity style={styles.startButton} onPress={handleStart}>
+          <Text style={styles.startButtonText}>Start Practice</Text>
+        </TouchableOpacity>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 
@@ -182,7 +185,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#2c3e50',
   },
   scrollContent: {
-    padding: 20,
+    paddingHorizontal: 20,
+    paddingTop: 10,
     paddingBottom: 40,
   },
   header: {
@@ -253,15 +257,17 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
   },
-  keySelector: {
+  keyContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
     marginTop: 10,
-    marginBottom: 10,
   },
   keyButton: {
     minWidth: 60,
     paddingHorizontal: 12,
     paddingVertical: 8,
-    marginHorizontal: 5,
+    marginRight: 10,
+    marginBottom: 10,
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
     borderRadius: 20,
     borderWidth: 1,

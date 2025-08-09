@@ -1,3 +1,4 @@
+import 'regenerator-runtime/runtime';
 import { registerRootComponent } from 'expo';
 
 import App from './App';

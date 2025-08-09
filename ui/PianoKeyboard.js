@@ -1,10 +1,42 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Platform } from 'react-native';
+import * as ScreenOrientation from 'expo-screen-orientation';
 import PianoKey from './PianoKey';
 import ChordControls from './ChordControls';
 import { notes, getInversionName } from '../data/chords';
 import { initAudio, playTone } from '../logic/audio';
 import { generateNewChord, checkAnswer, getKeyStyleForNote } from '../logic/practiceLogic';
+
+// Helper functions for orientation control
+const lockToLandscape = () => {
+  if (Platform.OS === 'web') return;
+  
+  // Use promise-based approach instead of async/await
+  ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE)
+    .then(() => {
+      console.log('Locked to landscape');
+    })
+    .catch((error) => {
+      console.log('Could not lock orientation:', error);
+    });
+};
+
+const unlockOrientation = () => {
+  if (Platform.OS === 'web') return;
+  
+  // First set to portrait, then unlock to allow both orientations
+  ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP)
+    .then(() => {
+      // After setting to portrait, unlock to allow rotation
+      return ScreenOrientation.unlockAsync();
+    })
+    .then(() => {
+      console.log('Reset to portrait and unlocked');
+    })
+    .catch((error) => {
+      console.log('Could not reset orientation:', error);
+    });
+};
 
 const PianoKeyboard = ({ settings, chordDeck, onGoBack }) => {
   const [selectedKeys, setSelectedKeys] = useState(new Set());
@@ -15,8 +47,16 @@ const PianoKeyboard = ({ settings, chordDeck, onGoBack }) => {
   const [soundEnabled, setSoundEnabled] = useState(true);
 
   useEffect(() => {
+    // Lock to landscape when component mounts
+    lockToLandscape();
+    
     initAudio();
     handleGenerateNewChord();
+    
+    // Cleanup: unlock orientation when component unmounts
+    return () => {
+      unlockOrientation();
+    };
   }, []);
 
   const handleGenerateNewChord = () => {
@@ -133,7 +173,10 @@ const PianoKeyboard = ({ settings, chordDeck, onGoBack }) => {
     <View style={styles.container}>
       <TouchableOpacity 
         style={styles.backButton}
-        onPress={onGoBack}
+        onPress={() => {
+          unlockOrientation();
+          onGoBack();
+        }}
       >
         <Text style={styles.backButtonText}>← Back</Text>
       </TouchableOpacity>
