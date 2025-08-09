@@ -8,6 +8,7 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "test": "jest --watchAll=false",
+    "test:coverage": "jest --coverage --watchAll=false",
     "typecheck": "tsc --noEmit",
     "lint": "tsc --noEmit && npm test"
   },

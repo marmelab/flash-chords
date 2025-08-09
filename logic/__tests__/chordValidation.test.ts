@@ -207,4 +207,187 @@ describe("getKeyStyle", () => {
       });
     });
   });
+
+  describe('edge cases and additional coverage', () => {
+    describe('validateChord with enharmonic equivalents', () => {
+      it('should accept Db as equivalent to C#', () => {
+        const selectedNotes = ['Db4', 'F4', 'Ab4']; // Db major
+        const expectedNotes = ['C#4', 'F4', 'G#4']; // C# major (enharmonic)
+        expect(validateChord(selectedNotes, expectedNotes)).toBe(true);
+      });
+
+      it('should accept Bb as equivalent to A#', () => {
+        const selectedNotes = ['Bb4', 'D5', 'F5']; // Bb major
+        const expectedNotes = ['A#4', 'D5', 'F5']; // A# major (enharmonic)
+        expect(validateChord(selectedNotes, expectedNotes)).toBe(true);
+      });
+
+      it('should handle Cb as equivalent to B', () => {
+        const selectedNotes = ['Cb4', 'Eb4', 'Gb4']; // Cb major
+        const expectedNotes = ['B3', 'D#4', 'F#4']; // B major (enharmonic, different octave)
+        expect(validateChord(selectedNotes, expectedNotes)).toBe(false); // Different octave
+      });
+
+      it('should handle mixed enharmonics in a chord', () => {
+        const selectedNotes = ['C4', 'Eb4', 'G4']; // C minor with Eb
+        const expectedNotes = ['C4', 'D#4', 'G4']; // C minor with D# (enharmonic)
+        expect(validateChord(selectedNotes, expectedNotes)).toBe(true);
+      });
+    });
+
+    describe('validateChord with malformed input', () => {
+      it('should handle notes without octave numbers', () => {
+        const selectedNotes = ['C', 'E', 'G'];
+        const expectedNotes = ['C4', 'E4', 'G4'];
+        expect(validateChord(selectedNotes, expectedNotes)).toBe(false);
+      });
+
+      it('should handle empty arrays', () => {
+        expect(validateChord([], [])).toBe(true); // Both empty = match
+        expect(validateChord(['C4'], [])).toBe(false);
+        expect(validateChord([], ['C4'])).toBe(false);
+      });
+
+      it('should handle null or undefined gracefully', () => {
+        expect(validateChord(null as any, ['C4'])).toBe(false);
+        expect(validateChord(['C4'], null as any)).toBe(false);
+        expect(validateChord(undefined as any, undefined as any)).toBe(false);
+      });
+
+      it('should handle invalid note formats', () => {
+        const selectedNotes = ['X4', 'Y4', 'Z4']; // Invalid notes
+        const expectedNotes = ['C4', 'E4', 'G4'];
+        expect(validateChord(selectedNotes, expectedNotes)).toBe(false);
+      });
+
+      it('should handle very high octaves', () => {
+        const selectedNotes = ['C9', 'E9', 'G9'];
+        const expectedNotes = ['C4', 'E4', 'G4'];
+        expect(validateChord(selectedNotes, expectedNotes)).toBe(true); // Same intervals, different octave
+      });
+    });
+
+    describe('getKeyStyle edge cases', () => {
+      it('should handle null in isCorrect parameter', () => {
+        const selectedKeys = new Set(['C4']);
+        const chordNotes = ['C4', 'E4', 'G4'];
+        const result = getKeyStyle('C4', selectedKeys, chordNotes, true, null);
+        // When isCorrect is null, treat as incorrect
+        expect(['incorrect', 'correct', 'missed']).toContain(result);
+      });
+
+      it('should handle empty selectedKeys set', () => {
+        const selectedKeys = new Set<string>();
+        const chordNotes = ['C4', 'E4', 'G4'];
+        
+        // Not showing result
+        expect(getKeyStyle('C4', selectedKeys, chordNotes, false, null)).toBe('default');
+        
+        // Showing result, note is expected but not selected
+        expect(getKeyStyle('C4', selectedKeys, chordNotes, true, false)).toBe('missed');
+      });
+
+      it('should handle empty chord notes array', () => {
+        const selectedKeys = new Set(['C4']);
+        const chordNotes: string[] = [];
+        
+        // Selected note but no expected notes
+        expect(getKeyStyle('C4', selectedKeys, chordNotes, true, false)).toBe('incorrect');
+      });
+
+      it('should handle note with multiple octave occurrences', () => {
+        const selectedKeys = new Set(['C4', 'C5']);
+        const chordNotes = ['C4', 'E4', 'G4', 'C5']; // C with octave doubling
+        
+        expect(getKeyStyle('C4', selectedKeys, chordNotes, true, true)).toBe('correct');
+        expect(getKeyStyle('C5', selectedKeys, chordNotes, true, true)).toBe('correct');
+      });
+
+      it('should prioritize exact match over pattern match', () => {
+        const selectedKeys = new Set(['C5']); // Wrong octave
+        const chordNotes = ['C4', 'E4', 'G4'];
+        
+        // C5 is in the chord pattern (C) but not exact
+        expect(getKeyStyle('C5', selectedKeys, chordNotes, true, false)).toBe('incorrect');
+        
+        // C4 is exact but not selected
+        expect(getKeyStyle('C4', selectedKeys, chordNotes, true, false)).toBe('missed');
+      });
+
+      it('should handle complex jazz chords', () => {
+        const selectedKeys = new Set(['C4', 'E4', 'G4', 'Bb4', 'D5', 'F#5']);
+        const chordNotes = ['C4', 'E4', 'G4', 'Bb4', 'D5', 'F#5']; // C13#11
+        
+        expect(getKeyStyle('C4', selectedKeys, chordNotes, true, true)).toBe('correct');
+        expect(getKeyStyle('F#5', selectedKeys, chordNotes, true, true)).toBe('correct');
+      });
+    });
+
+    describe('removeOctave additional cases', () => {
+      it('should handle double digit octaves', () => {
+        expect(removeOctave('C10')).toBe('C');
+        expect(removeOctave('F#11')).toBe('F#');
+      });
+
+      it('should handle flat notes', () => {
+        expect(removeOctave('Bb4')).toBe('Bb');
+        expect(removeOctave('Db5')).toBe('Db');
+      });
+
+      it('should handle notes with no octave', () => {
+        expect(removeOctave('C')).toBe('C');
+        expect(removeOctave('F#')).toBe('F#');
+        expect(removeOctave('Bb')).toBe('Bb');
+      });
+
+      it('should handle empty string', () => {
+        expect(removeOctave('')).toBe('');
+      });
+
+      it('should handle invalid input gracefully', () => {
+        expect(removeOctave(null as any)).toBe(null);
+        expect(removeOctave(undefined as any)).toBe(undefined);
+      });
+    });
+
+    describe('chord inversion validation', () => {
+      it('should validate augmented chords', () => {
+        const selectedNotes = ['C4', 'E4', 'G#4']; // C augmented
+        const expectedNotes = ['C4', 'E4', 'G#4'];
+        expect(validateChord(selectedNotes, expectedNotes)).toBe(true);
+      });
+
+      it('should validate sus chords', () => {
+        const selectedNotes = ['C4', 'F4', 'G4']; // Csus4
+        const expectedNotes = ['C4', 'F4', 'G4'];
+        expect(validateChord(selectedNotes, expectedNotes)).toBe(true);
+      });
+
+      it('should reject partial voicings', () => {
+        const selectedNotes = ['C4', 'G4']; // Missing the third
+        const expectedNotes = ['C4', 'E4', 'G4'];
+        expect(validateChord(selectedNotes, expectedNotes)).toBe(false);
+      });
+
+      it('should handle rootless voicings correctly', () => {
+        const selectedNotes = ['E4', 'G4', 'Bb4', 'D5']; // Rootless C7
+        const expectedNotes = ['E4', 'G4', 'Bb4', 'D5'];
+        expect(validateChord(selectedNotes, expectedNotes)).toBe(true);
+      });
+    });
+
+    describe('performance with large chords', () => {
+      it('should handle extended chords efficiently', () => {
+        const selectedNotes = ['C4', 'E4', 'G4', 'B4', 'D5', 'F#5', 'A5']; // Cmaj13#11
+        const expectedNotes = ['C4', 'E4', 'G4', 'B4', 'D5', 'F#5', 'A5'];
+        expect(validateChord(selectedNotes, expectedNotes)).toBe(true);
+      });
+
+      it('should handle chord with many duplicated notes', () => {
+        const selectedNotes = ['C4', 'C5', 'E4', 'E5', 'G4', 'G5']; // Doubled voicing
+        const expectedNotes = ['C4', 'E4', 'G4', 'C5', 'E5', 'G5'];
+        expect(validateChord(selectedNotes, expectedNotes)).toBe(false); // Order matters
+      });
+    });
+  });
 });

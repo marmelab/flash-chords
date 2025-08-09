@@ -12,7 +12,12 @@ interface ParsedNote {
 /**
  * Removes octave numbers from a note string
  */
-export const removeOctave = (note: string): string => note.replace(/[0-9]/g, '');
+export const removeOctave = (note: string): string => {
+  if (!note || typeof note !== 'string') {
+    return note as any;
+  }
+  return note.replace(/[0-9]/g, '');
+};
 
 /**
  * Parses a note string into note name and octave
@@ -63,6 +68,11 @@ const sortByPitch = (notes: string[]): ParsedNote[] => {
  * Accepts the chord in any octave but maintains the same inversion
  */
 export const validateChord: NoteValidator = (selectedNotes: string[], expectedNotes: string[]): boolean => {
+  // Handle null/undefined input
+  if (!selectedNotes || !expectedNotes) {
+    return false;
+  }
+  
   // Check if same number of notes
   if (selectedNotes.length !== expectedNotes.length) {
     return false;
