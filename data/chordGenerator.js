@@ -169,6 +169,105 @@ const generateDimChord = (root) => {
 };
 
 /**
+ * Generate minor 7th chord (1-b3-5-b7)
+ */
+const generateMin7Chord = (root) => {
+  const rootNote = root + '4';
+  return {
+    root: [
+      rootNote,
+      getNoteAtInterval(rootNote, 3),  // Minor third
+      getNoteAtInterval(rootNote, 7),  // Perfect fifth
+      getNoteAtInterval(rootNote, 10)  // Minor seventh
+    ],
+    first: [
+      getNoteAtInterval(rootNote, 3),  // Minor third
+      getNoteAtInterval(rootNote, 7),  // Perfect fifth
+      getNoteAtInterval(rootNote, 10), // Minor seventh
+      getNoteAtInterval(rootNote, 12)  // Root (octave up)
+    ],
+    second: [
+      getNoteAtInterval(rootNote, 7),  // Perfect fifth
+      getNoteAtInterval(rootNote, 10), // Minor seventh
+      getNoteAtInterval(rootNote, 12), // Root (octave up)
+      getNoteAtInterval(rootNote, 15)  // Minor third (octave up)
+    ],
+    third: [
+      getNoteAtInterval(rootNote, 10), // Minor seventh
+      getNoteAtInterval(rootNote, 12), // Root (octave up)
+      getNoteAtInterval(rootNote, 15), // Minor third (octave up)
+      getNoteAtInterval(rootNote, 19)  // Perfect fifth (octave up)
+    ]
+  };
+};
+
+/**
+ * Generate diminished 7th chord (1-b3-b5-bb7)
+ */
+const generateDim7Chord = (root) => {
+  const rootNote = root + '4';
+  return {
+    root: [
+      rootNote,
+      getNoteAtInterval(rootNote, 3),  // Minor third
+      getNoteAtInterval(rootNote, 6),  // Diminished fifth
+      getNoteAtInterval(rootNote, 9)   // Diminished seventh
+    ],
+    first: [
+      getNoteAtInterval(rootNote, 3),  // Minor third
+      getNoteAtInterval(rootNote, 6),  // Diminished fifth
+      getNoteAtInterval(rootNote, 9),  // Diminished seventh
+      getNoteAtInterval(rootNote, 12)  // Root (octave up)
+    ],
+    second: [
+      getNoteAtInterval(rootNote, 6),  // Diminished fifth
+      getNoteAtInterval(rootNote, 9),  // Diminished seventh
+      getNoteAtInterval(rootNote, 12), // Root (octave up)
+      getNoteAtInterval(rootNote, 15)  // Minor third (octave up)
+    ],
+    third: [
+      getNoteAtInterval(rootNote, 9),  // Diminished seventh
+      getNoteAtInterval(rootNote, 12), // Root (octave up)
+      getNoteAtInterval(rootNote, 15), // Minor third (octave up)
+      getNoteAtInterval(rootNote, 18)  // Diminished fifth (octave up)
+    ]
+  };
+};
+
+/**
+ * Generate minor 7 flat 5 (half-diminished) chord (1-b3-b5-b7)
+ */
+const generateMin7b5Chord = (root) => {
+  const rootNote = root + '4';
+  return {
+    root: [
+      rootNote,
+      getNoteAtInterval(rootNote, 3),  // Minor third
+      getNoteAtInterval(rootNote, 6),  // Diminished fifth
+      getNoteAtInterval(rootNote, 10)  // Minor seventh
+    ],
+    first: [
+      getNoteAtInterval(rootNote, 3),  // Minor third
+      getNoteAtInterval(rootNote, 6),  // Diminished fifth
+      getNoteAtInterval(rootNote, 10), // Minor seventh
+      getNoteAtInterval(rootNote, 12)  // Root (octave up)
+    ],
+    second: [
+      getNoteAtInterval(rootNote, 6),  // Diminished fifth
+      getNoteAtInterval(rootNote, 10), // Minor seventh
+      getNoteAtInterval(rootNote, 12), // Root (octave up)
+      getNoteAtInterval(rootNote, 15)  // Minor third (octave up)
+    ],
+    third: [
+      getNoteAtInterval(rootNote, 10), // Minor seventh
+      getNoteAtInterval(rootNote, 12), // Root (octave up)
+      getNoteAtInterval(rootNote, 15), // Minor third (octave up)
+      getNoteAtInterval(rootNote, 18)  // Diminished fifth (octave up)
+    ]
+  };
+};
+
+/**
  * Generate all chord types for all keys
  */
 export const generateAllChords = () => {
@@ -204,6 +303,24 @@ export const generateAllChords = () => {
     allChords.push({
       name: root + 'dim',
       notes: generateDimChord(root)
+    });
+    
+    // Minor 7th
+    allChords.push({
+      name: root + 'm7',
+      notes: generateMin7Chord(root)
+    });
+    
+    // Diminished 7th
+    allChords.push({
+      name: root + 'dim7',
+      notes: generateDim7Chord(root)
+    });
+    
+    // Minor 7 flat 5 (half-diminished)
+    allChords.push({
+      name: root + 'm7b5',
+      notes: generateMin7b5Chord(root)
     });
   });
   

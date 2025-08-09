@@ -6,14 +6,16 @@ import {
   TouchableOpacity,
   Switch,
   Platform,
+  ScrollView,
 } from 'react-native';
-import Slider from '@react-native-community/slider';
+import { keyOptions } from '../data/diatonicChords';
 
 const HomeScreen = ({ onStartExercise }) => {
   const [includeRoot, setIncludeRoot] = useState(true);
   const [includeFirst, setIncludeFirst] = useState(true);
   const [includeSecond, setIncludeSecond] = useState(true);
-  const [chordCount, setChordCount] = useState(10);
+  const [selectedKey, setSelectedKey] = useState('all');
+  const [chordType, setChordType] = useState('major-triads'); // 'major-triads', 'major-sevenths', 'minor-triads', 'minor-sevenths'
 
   const handleStart = () => {
     // Validate that at least one inversion is selected
@@ -28,14 +30,15 @@ const HomeScreen = ({ onStartExercise }) => {
         first: includeFirst,
         second: includeSecond,
       },
-      chordCount,
+      selectedKey,
+      chordType,
     };
 
     onStartExercise(settings);
   };
 
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
       <View style={styles.header}>
         <Text style={styles.title}>Piano Chord Practice</Text>
         <Text style={styles.subtitle}>Configure your exercise</Text>
@@ -77,22 +80,97 @@ const HomeScreen = ({ onStartExercise }) => {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Number of Chords</Text>
-          <Text style={styles.sliderValue}>{chordCount}</Text>
-          <Slider
-            style={styles.slider}
-            minimumValue={5}
-            maximumValue={25}
-            step={1}
-            value={chordCount}
-            onValueChange={setChordCount}
-            minimumTrackTintColor="#3498db"
-            maximumTrackTintColor="#95a5a6"
-            thumbTintColor="#2980b9"
-          />
-          <View style={styles.sliderLabels}>
-            <Text style={styles.sliderLabel}>5</Text>
-            <Text style={styles.sliderLabel}>25</Text>
+          <Text style={styles.sectionTitle}>Key Selection</Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.keySelector}>
+            {keyOptions.map((key) => (
+              <TouchableOpacity
+                key={key.value}
+                style={[
+                  styles.keyButton,
+                  selectedKey === key.value && styles.selectedKeyButton,
+                ]}
+                onPress={() => setSelectedKey(key.value)}
+              >
+                <Text
+                  style={[
+                    styles.keyButtonText,
+                    selectedKey === key.value && styles.selectedKeyButtonText,
+                  ]}
+                >
+                  {key.label}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Chord Types</Text>
+          <View style={styles.chordTypeGrid}>
+            <TouchableOpacity
+              style={[
+                styles.chordTypeButton,
+                chordType === 'major-triads' && styles.selectedChordTypeButton,
+              ]}
+              onPress={() => setChordType('major-triads')}
+            >
+              <Text
+                style={[
+                  styles.chordTypeButtonText,
+                  chordType === 'major-triads' && styles.selectedChordTypeButtonText,
+                ]}
+              >
+                Major Triads
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                styles.chordTypeButton,
+                chordType === 'major-sevenths' && styles.selectedChordTypeButton,
+              ]}
+              onPress={() => setChordType('major-sevenths')}
+            >
+              <Text
+                style={[
+                  styles.chordTypeButtonText,
+                  chordType === 'major-sevenths' && styles.selectedChordTypeButtonText,
+                ]}
+              >
+                Major 7ths
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                styles.chordTypeButton,
+                chordType === 'minor-triads' && styles.selectedChordTypeButton,
+              ]}
+              onPress={() => setChordType('minor-triads')}
+            >
+              <Text
+                style={[
+                  styles.chordTypeButtonText,
+                  chordType === 'minor-triads' && styles.selectedChordTypeButtonText,
+                ]}
+              >
+                Minor Triads
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                styles.chordTypeButton,
+                chordType === 'minor-sevenths' && styles.selectedChordTypeButton,
+              ]}
+              onPress={() => setChordType('minor-sevenths')}
+            >
+              <Text
+                style={[
+                  styles.chordTypeButtonText,
+                  chordType === 'minor-sevenths' && styles.selectedChordTypeButtonText,
+                ]}
+              >
+                Minor 7ths
+              </Text>
+            </TouchableOpacity>
           </View>
         </View>
       </View>
@@ -100,7 +178,7 @@ const HomeScreen = ({ onStartExercise }) => {
       <TouchableOpacity style={styles.startButton} onPress={handleStart}>
         <Text style={styles.startButtonText}>Start Practice</Text>
       </TouchableOpacity>
-    </View>
+    </ScrollView>
   );
 };
 
@@ -108,8 +186,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#2c3e50',
+  },
+  scrollContent: {
     padding: 20,
-    justifyContent: 'center',
+    paddingBottom: 40,
   },
   header: {
     alignItems: 'center',
@@ -152,26 +232,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#ecf0f1',
   },
-  sliderValue: {
-    fontSize: 36,
-    fontWeight: 'bold',
-    color: '#3498db',
-    textAlign: 'center',
-    marginBottom: 10,
-  },
-  slider: {
-    width: '100%',
-    height: 40,
-  },
-  sliderLabels: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 5,
-  },
-  sliderLabel: {
-    color: '#95a5a6',
-    fontSize: 14,
-  },
   startButton: {
     backgroundColor: '#27ae60',
     paddingVertical: 15,
@@ -181,6 +241,61 @@ const styles = StyleSheet.create({
   startButtonText: {
     color: 'white',
     fontSize: 20,
+    fontWeight: 'bold',
+  },
+  keySelector: {
+    marginTop: 10,
+    marginBottom: 10,
+  },
+  keyButton: {
+    paddingHorizontal: 15,
+    paddingVertical: 8,
+    marginHorizontal: 5,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+  },
+  selectedKeyButton: {
+    backgroundColor: '#3498db',
+    borderColor: '#3498db',
+  },
+  keyButtonText: {
+    color: '#ecf0f1',
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  selectedKeyButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
+  },
+  chordTypeGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    marginTop: 10,
+  },
+  chordTypeButton: {
+    width: '48%',
+    paddingVertical: 12,
+    marginBottom: 10,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+    alignItems: 'center',
+  },
+  selectedChordTypeButton: {
+    backgroundColor: '#3498db',
+    borderColor: '#3498db',
+  },
+  chordTypeButtonText: {
+    color: '#ecf0f1',
+    fontSize: 16,
+    fontWeight: '500',
+  },
+  selectedChordTypeButtonText: {
+    color: 'white',
     fontWeight: 'bold',
   },
 });
