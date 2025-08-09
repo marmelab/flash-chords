@@ -1,12 +1,17 @@
 import { chords } from '../data/chords';
 import { diatonicChords } from '../data/diatonicChords';
+import type { 
+  ExerciseSettings, 
+  ChordDeckItem, 
+  ChordQuality, 
+  ExtensionType,
+  Chord
+} from '../types';
 
 /**
  * Determine the quality of a chord from its name
- * @param {string} chordName - The chord name (e.g., "C", "Dm", "G7", "Cmaj7")
- * @returns {string} The chord quality: 'major', 'minor', 'diminished', or 'dominant'
  */
-const getChordQuality = (chordName) => {
+const getChordQuality = (chordName: string): ChordQuality => {
   // Diminished chords (including half-diminished)
   if (chordName.includes('dim') || chordName.includes('m7b5')) {
     return 'diminished';
@@ -28,10 +33,8 @@ const getChordQuality = (chordName) => {
 
 /**
  * Check if a chord is a triad or seventh chord
- * @param {string} chordName - The chord name
- * @returns {string} 'triad' or 'seventh'
  */
-const getChordExtension = (chordName) => {
+const getChordExtension = (chordName: string): 'triad' | 'seventh' => {
   // If it contains '7', it's a seventh chord
   if (chordName.includes('7')) {
     return 'seventh';
@@ -41,14 +44,8 @@ const getChordExtension = (chordName) => {
 
 /**
  * Generates a deck of chord-inversion pairs based on user settings
- * @param {Object} settings - User settings for the exercise
- * @param {Array} settings.selectedKeys - Array of selected keys
- * @param {Array} settings.selectedQualities - Array of chord qualities to include
- * @param {Array} settings.selectedExtensions - Array of extensions ('triads', 'sevenths')
- * @param {Object} settings.inversions - Which inversions to include
- * @returns {Array} Array of chord-inversion objects for the exercise
  */
-export const generateChordDeck = (settings) => {
+export const generateChordDeck = (settings: ExerciseSettings): ChordDeckItem[] => {
   const { 
     selectedKeys = ['C'],
     selectedQualities = ['major', 'minor', 'diminished'],
@@ -57,7 +54,7 @@ export const generateChordDeck = (settings) => {
   } = settings;
   
   // Collect all diatonic chord names from selected keys
-  const diatonicChordNames = new Set();
+  const diatonicChordNames = new Set<string>();
   
   selectedKeys.forEach(key => {
     // Key is already in the format we need (e.g., 'C' for major, 'Cm' for minor)
@@ -94,7 +91,7 @@ export const generateChordDeck = (settings) => {
     
     // Check extension
     const extension = getChordExtension(chord.name);
-    const extensionType = extension === 'triad' ? 'triads' : 'sevenths';
+    const extensionType: ExtensionType = extension === 'triad' ? 'triads' : 'sevenths';
     if (!selectedExtensions.includes(extensionType)) {
       return false;
     }
@@ -108,7 +105,7 @@ export const generateChordDeck = (settings) => {
   }
   
   // Create all possible chord-inversion combinations
-  const allCombinations = [];
+  const allCombinations: ChordDeckItem[] = [];
   
   filteredChords.forEach(chord => {
     // Add root position if selected and available
@@ -166,10 +163,8 @@ export const generateChordDeck = (settings) => {
 
 /**
  * Selects a random chord from the deck
- * @param {Array} deck - The chord deck for the current exercise
- * @returns {Object} A random chord-inversion pair from the deck
  */
-export const selectRandomFromDeck = (deck) => {
+export const selectRandomFromDeck = (deck: ChordDeckItem[]): ChordDeckItem | null => {
   if (!deck || deck.length === 0) {
     return null;
   }

@@ -1,7 +1,19 @@
 import React from 'react';
 import { View, TouchableOpacity, Text, StyleSheet } from 'react-native';
 
-const ChordControls = ({ showResult, isCorrect, onSubmit, onNewChord }) => {
+interface ChordControlsProps {
+  showResult: boolean;
+  isCorrect: boolean | null;
+  onSubmit: () => void;
+  onNewChord: () => void;
+}
+
+const ChordControls: React.FC<ChordControlsProps> = ({ 
+  showResult, 
+  isCorrect, 
+  onSubmit, 
+  onNewChord 
+}) => {
   return (
     <View style={styles.controls}>
       <TouchableOpacity 

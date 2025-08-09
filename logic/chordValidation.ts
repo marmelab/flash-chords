@@ -1,16 +1,23 @@
 /**
- * Removes octave numbers from a note string
- * @param {string} note - Note string like "C4" or "D#5"
- * @returns {string} Note without octave like "C" or "D#"
+ * Chord validation and visual style logic
  */
-export const removeOctave = (note) => note.replace(/[0-9]/g, '');
+
+import type { KeyStyle, NoteValidator, KeyStyleCalculator } from '../types';
+
+interface ParsedNote {
+  note: string;
+  octave: number;
+}
+
+/**
+ * Removes octave numbers from a note string
+ */
+export const removeOctave = (note: string): string => note.replace(/[0-9]/g, '');
 
 /**
  * Parses a note string into note name and octave
- * @param {string} noteStr - Note string like "C4" or "D#5" or "Bb4"
- * @returns {{note: string, octave: number}} Parsed note object
  */
-const parseNote = (noteStr) => {
+const parseNote = (noteStr: string): ParsedNote | null => {
   const match = noteStr.match(/([A-G][#b]?)(\d)/);
   if (!match) return null;
   return { note: match[1], octave: parseInt(match[2]) };
@@ -18,14 +25,12 @@ const parseNote = (noteStr) => {
 
 /**
  * Gets the chromatic position of a note (C=0, C#=1, D=2, etc.)
- * @param {string} note - Note name without octave
- * @returns {number} Chromatic position 0-11
  */
-const getNotePosition = (note) => {
-  const noteOrder = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+const getNotePosition = (note: string): number => {
+  const noteOrder: string[] = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
   
   // Map flat notes to their sharp equivalents
-  const flatToSharp = {
+  const flatToSharp: Record<string, string> = {
     'Db': 'C#',
     'Eb': 'D#',
     'Gb': 'F#',
@@ -41,13 +46,11 @@ const getNotePosition = (note) => {
 
 /**
  * Sorts notes by absolute pitch (considering octave and note position)
- * @param {string[]} notes - Array of note strings
- * @returns {object[]} Sorted array of parsed note objects
  */
-const sortByPitch = (notes) => {
+const sortByPitch = (notes: string[]): ParsedNote[] => {
   return notes
     .map(parseNote)
-    .filter(n => n !== null)
+    .filter((n): n is ParsedNote => n !== null)
     .sort((a, b) => {
       const aPitch = a.octave * 12 + getNotePosition(a.note);
       const bPitch = b.octave * 12 + getNotePosition(b.note);
@@ -58,30 +61,26 @@ const sortByPitch = (notes) => {
 /**
  * Validates if the selected notes match the expected chord
  * Accepts the chord in any octave but maintains the same inversion
- * 
- * @param {string[]} selectedNotes - Array of selected notes (e.g., ["C5", "E5", "G5"])
- * @param {string[]} expectedNotes - Array of expected notes (e.g., ["C4", "E4", "G4"])
- * @returns {boolean} True if the chord is correct
  */
-export const validateChord = (selectedNotes, expectedNotes) => {
+export const validateChord: NoteValidator = (selectedNotes: string[], expectedNotes: string[]): boolean => {
   // Check if same number of notes
   if (selectedNotes.length !== expectedNotes.length) {
     return false;
   }
 
   // Parse the notes to get their components
-  const selectedParsed = selectedNotes.map(parseNote).filter(n => n !== null);
-  const expectedParsed = expectedNotes.map(parseNote).filter(n => n !== null);
+  const selectedParsed = selectedNotes.map(parseNote).filter((n): n is ParsedNote => n !== null);
+  const expectedParsed = expectedNotes.map(parseNote).filter((n): n is ParsedNote => n !== null);
 
   if (selectedParsed.length !== expectedParsed.length) {
     return false;
   }
 
   // Helper function to check if two notes are enharmonically equivalent
-  const areNotesEquivalent = (note1, note2) => {
+  const areNotesEquivalent = (note1: string, note2: string): boolean => {
     if (note1 === note2) return true;
     
-    const enharmonics = {
+    const enharmonics: Record<string, string> = {
       'C#': 'Db', 'Db': 'C#',
       'D#': 'Eb', 'Eb': 'D#',
       'F#': 'Gb', 'Gb': 'F#',
@@ -118,17 +117,16 @@ export const validateChord = (selectedNotes, expectedNotes) => {
 
 /**
  * Determines the visual style for a piano key based on the current state
- * 
- * @param {string} note - The note to check (e.g., "C4")
- * @param {Set} selectedKeys - Set of selected note strings
- * @param {string[]} chordNotes - Array of notes in the current chord
- * @param {boolean} showResult - Whether to show the result
- * @param {boolean} isCorrect - Whether the answer is correct
- * @returns {string} Style name: 'normal', 'selected', 'correct', 'wrong', or 'expected'
  */
-export const getKeyStyle = (note, selectedKeys, chordNotes, showResult, isCorrect) => {
+export const getKeyStyle: KeyStyleCalculator = (
+  note: string, 
+  selectedKeys: Set<string>, 
+  chordNotes: string[], 
+  showResult: boolean, 
+  isCorrect: boolean | null
+): KeyStyle => {
   if (!showResult) {
-    return selectedKeys.has(note) ? 'selected' : 'normal';
+    return selectedKeys.has(note) ? 'selected' : 'default';
   }
 
   const noteWithoutOctave = removeOctave(note);
@@ -148,7 +146,7 @@ export const getKeyStyle = (note, selectedKeys, chordNotes, showResult, isCorrec
     if (isSelected && isInChordPattern) {
       return 'correct';  // Selected and it's a correct note
     }
-    return 'normal';
+    return 'default';
   }
   
   // If the answer is incorrect
@@ -157,12 +155,12 @@ export const getKeyStyle = (note, selectedKeys, chordNotes, showResult, isCorrec
     return 'correct';  // Show as correct since it's in the right place
   } else if (isSelected && isInChordPattern) {
     // The note is part of the chord but not in the right position/octave
-    return 'wrong';  
+    return 'incorrect';  
   } else if (isSelected && !isInChordPattern) {
-    return 'wrong';  // Selected but not part of the chord at all
+    return 'incorrect';  // Selected but not part of the chord at all
   } else if (isExactNote && !isSelected) {
-    return 'expected';  // Show expected notes when the answer is wrong
+    return 'missed';  // Show expected notes when the answer is wrong
   }
   
-  return 'normal';
+  return 'default';
 };

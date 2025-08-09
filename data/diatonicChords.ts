@@ -3,7 +3,9 @@
  * Each key contains the 7 chords built on each scale degree
  */
 
-export const diatonicChords = {
+import type { DiatonicChords, KeyOption } from '../types';
+
+export const diatonicChords: DiatonicChords = {
   // Major keys
   'C': {
     triads: ['C', 'Dm', 'Em', 'F', 'G', 'Am', 'Bdim'],
@@ -136,12 +138,12 @@ export const diatonicChords = {
   
   // "All keys" option
   'all': {
-    triads: null,  // Will include all chords
-    sevenths: null  // Will include all 7th chords
+    triads: [],  // Will include all chords
+    sevenths: []  // Will include all 7th chords
   }
 };
 
-export const keyOptions = [
+export const keyOptions: KeyOption[] = [
   { label: 'C', value: 'C' },
   { label: 'C#/Db', value: 'C#' },
   { label: 'D', value: 'D' },

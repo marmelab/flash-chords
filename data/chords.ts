@@ -1,9 +1,10 @@
 import { generateAllChords } from './chordGenerator';
+import type { Chord, Note, InversionType } from '../types';
 
 // Generate all chords for all keys
-export const chords = generateAllChords();
+export const chords: Chord[] = generateAllChords();
 
-export const notes = [
+export const notes: Note[] = [
   { note: 'C4', freq: 261.63, type: 'white' },
   { note: 'C#4', freq: 277.18, type: 'black' },
   { note: 'D4', freq: 293.66, type: 'white' },
@@ -30,8 +31,8 @@ export const notes = [
   { note: 'B5', freq: 987.77, type: 'white' },
 ];
 
-export const getInversionName = (inversion) => {
-  const names = {
+export const getInversionName = (inversion: InversionType): string => {
+  const names: Record<InversionType, string> = {
     root: 'root position',
     first: '1st inversion',
     second: '2nd inversion',

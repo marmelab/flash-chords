@@ -6,9 +6,16 @@ import ChordControls from './ChordControls';
 import { notes, getInversionName } from '../data/chords';
 import { initAudio, playTone } from '../logic/audio';
 import { generateNewChord, checkAnswer, getKeyStyleForNote } from '../logic/practiceLogic';
+import type { 
+  PianoKeyboardComponent, 
+  Chord, 
+  InversionType, 
+  Note, 
+  KeyStyle 
+} from '../types';
 
 // Helper functions for orientation control
-const lockToLandscape = () => {
+const lockToLandscape = (): void => {
   if (Platform.OS === 'web') return;
   
   // Use promise-based approach instead of async/await
@@ -21,7 +28,7 @@ const lockToLandscape = () => {
     });
 };
 
-const unlockOrientation = () => {
+const unlockOrientation = (): void => {
   if (Platform.OS === 'web') return;
   
   // First set to portrait, then unlock to allow both orientations
@@ -38,13 +45,13 @@ const unlockOrientation = () => {
     });
 };
 
-const PianoKeyboard = ({ settings, chordDeck, onGoBack }) => {
-  const [selectedKeys, setSelectedKeys] = useState(new Set());
-  const [currentChord, setCurrentChord] = useState(null);
-  const [currentInversion, setCurrentInversion] = useState(0);
-  const [showResult, setShowResult] = useState(false);
-  const [isCorrect, setIsCorrect] = useState(null);
-  const [soundEnabled, setSoundEnabled] = useState(true);
+const PianoKeyboard: PianoKeyboardComponent = ({ settings, chordDeck, onGoBack }) => {
+  const [selectedKeys, setSelectedKeys] = useState<Set<string>>(new Set());
+  const [currentChord, setCurrentChord] = useState<Chord | null>(null);
+  const [currentInversion, setCurrentInversion] = useState<InversionType>('root');
+  const [showResult, setShowResult] = useState<boolean>(false);
+  const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
+  const [soundEnabled, setSoundEnabled] = useState<boolean>(true);
 
   useEffect(() => {
     // Lock to landscape when component mounts
@@ -59,16 +66,19 @@ const PianoKeyboard = ({ settings, chordDeck, onGoBack }) => {
     };
   }, []);
 
-  const handleGenerateNewChord = () => {
-    const { chord, inversion } = generateNewChord(chordDeck);
-    setCurrentChord(chord);
-    setCurrentInversion(inversion);
-    setSelectedKeys(new Set());
-    setShowResult(false);
-    setIsCorrect(null);
+  const handleGenerateNewChord = (): void => {
+    const result = generateNewChord(chordDeck);
+    if (result) {
+      const { chord, inversion } = result;
+      setCurrentChord(chord);
+      setCurrentInversion(inversion);
+      setSelectedKeys(new Set());
+      setShowResult(false);
+      setIsCorrect(null);
+    }
   };
 
-  const handleKeyPress = (note, frequency) => {
+  const handleKeyPress = (note: string, frequency: number): void => {
     if (showResult) return;
     
     if (soundEnabled) {
@@ -84,7 +94,7 @@ const PianoKeyboard = ({ settings, chordDeck, onGoBack }) => {
     setSelectedKeys(newSelectedKeys);
   };
 
-  const handleCheckAnswer = () => {
+  const handleCheckAnswer = (): void => {
     const isAnswerCorrect = checkAnswer(selectedKeys, currentChord, currentInversion);
     
     setIsCorrect(isAnswerCorrect);
@@ -97,7 +107,7 @@ const PianoKeyboard = ({ settings, chordDeck, onGoBack }) => {
     }
   };
 
-  const getKeyStyle = (note) => {
+  const getKeyStyle = (note: string): KeyStyle => {
     return getKeyStyleForNote(
       note,
       selectedKeys,
@@ -108,7 +118,7 @@ const PianoKeyboard = ({ settings, chordDeck, onGoBack }) => {
     );
   };
 
-  const getKeyPosition = (note, index, whiteKeyIndex) => {
+  const getKeyPosition = (note: Note, index: number, whiteKeyIndex: number): number => {
     const whiteKeyWidth = 50;
     const blackKeyWidth = 30;
     
@@ -116,7 +126,7 @@ const PianoKeyboard = ({ settings, chordDeck, onGoBack }) => {
       return whiteKeyIndex * whiteKeyWidth;
     }
     
-    const blackKeyPositions = {
+    const blackKeyPositions: Record<string, number> = {
       'C#4': 1, 'D#4': 2, 'F#4': 4, 'G#4': 5, 'A#4': 6,
       'C#5': 8, 'D#5': 9, 'F#5': 11, 'G#5': 12, 'A#5': 13,
     };
@@ -125,8 +135,8 @@ const PianoKeyboard = ({ settings, chordDeck, onGoBack }) => {
     return (whiteKeyPos * whiteKeyWidth) - (blackKeyWidth / 2);
   };
 
-  const renderKeys = () => {
-    const keys = [];
+  const renderKeys = (): React.ReactElement[] => {
+    const keys: React.ReactElement[] = [];
     let whiteKeyIndex = 0;
     
     // Render white keys first

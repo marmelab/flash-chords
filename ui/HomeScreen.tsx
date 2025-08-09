@@ -9,9 +9,17 @@ import {
   ScrollView,
   SafeAreaView,
 } from 'react-native';
+import type { 
+  HomeScreenComponent, 
+  KeyOption, 
+  ChordQuality, 
+  ExtensionType,
+  ExerciseSettings 
+} from '../types';
+
 // Generate all 24 key options (12 major + 12 minor)
 // Using the most common enharmonic spellings
-const keyOptions = [
+const keyOptions: KeyOption[] = [
   // Major keys
   { value: 'C', label: 'C' },
   { value: 'Db', label: 'Db' },
@@ -40,13 +48,13 @@ const keyOptions = [
   { value: 'Bm', label: 'Bm' },
 ];
 
-const HomeScreen = ({ onStartExercise }) => {
-  const [selectedKeys, setSelectedKeys] = useState(['C']); // Multiple selection, default to C major
-  const [selectedQualities, setSelectedQualities] = useState(['major', 'minor', 'diminished', 'dominant']); // Chord qualities
-  const [selectedExtensions, setSelectedExtensions] = useState(['triads']); // triads or sevenths
-  const [selectedInversions, setSelectedInversions] = useState(['root']); // Multiple selection, default to root
+const HomeScreen: HomeScreenComponent = ({ onStartExercise }) => {
+  const [selectedKeys, setSelectedKeys] = useState<string[]>(['C']); // Multiple selection, default to C major
+  const [selectedQualities, setSelectedQualities] = useState<ChordQuality[]>(['major', 'minor', 'diminished', 'dominant']); // Chord qualities
+  const [selectedExtensions, setSelectedExtensions] = useState<ExtensionType[]>(['triads']); // triads or sevenths
+  const [selectedInversions, setSelectedInversions] = useState<string[]>(['root']); // Multiple selection, default to root
 
-  const handleStart = () => {
+  const handleStart = (): void => {
     // Validate selections
     if (selectedKeys.length === 0) {
       alert('Please select at least one key');
@@ -65,7 +73,7 @@ const HomeScreen = ({ onStartExercise }) => {
       return;
     }
 
-    const settings = {
+    const settings: ExerciseSettings = {
       selectedKeys,
       selectedQualities,
       selectedExtensions,
@@ -160,10 +168,10 @@ const HomeScreen = ({ onStartExercise }) => {
           <Text style={styles.sectionTitle}>Chord Qualities</Text>
           <View style={styles.chipContainer}>
             {[
-              { label: 'Major', value: 'major' },
-              { label: 'Minor', value: 'minor' },
-              { label: 'Diminished', value: 'diminished' },
-              { label: 'Dominant', value: 'dominant' },
+              { label: 'Major', value: 'major' as ChordQuality },
+              { label: 'Minor', value: 'minor' as ChordQuality },
+              { label: 'Diminished', value: 'diminished' as ChordQuality },
+              { label: 'Dominant', value: 'dominant' as ChordQuality },
             ].map((quality) => {
               const isSelected = selectedQualities.includes(quality.value);
               return (
@@ -199,8 +207,8 @@ const HomeScreen = ({ onStartExercise }) => {
           <Text style={styles.sectionTitle}>Extensions</Text>
           <View style={styles.chipContainer}>
             {[
-              { label: 'Triads', value: 'triads' },
-              { label: '7ths', value: 'sevenths' },
+              { label: 'Triads', value: 'triads' as ExtensionType },
+              { label: '7ths', value: 'sevenths' as ExtensionType },
             ].map((extension) => {
               const isSelected = selectedExtensions.includes(extension.value);
               return (

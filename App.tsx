@@ -4,13 +4,18 @@ import { StyleSheet, View } from 'react-native';
 import HomeScreen from './ui/HomeScreen';
 import PianoKeyboard from './ui/PianoKeyboard';
 import { generateChordDeck } from './logic/deckGenerator';
+import type { 
+  ScreenType, 
+  ExerciseSettings, 
+  ChordDeckItem 
+} from './types';
 
-export default function App() {
-  const [currentScreen, setCurrentScreen] = useState('home');
-  const [exerciseSettings, setExerciseSettings] = useState(null);
-  const [chordDeck, setChordDeck] = useState(null);
+export default function App(): React.ReactElement {
+  const [currentScreen, setCurrentScreen] = useState<ScreenType>('home');
+  const [exerciseSettings, setExerciseSettings] = useState<ExerciseSettings | null>(null);
+  const [chordDeck, setChordDeck] = useState<ChordDeckItem[] | null>(null);
 
-  const handleStartExercise = (settings) => {
+  const handleStartExercise = (settings: ExerciseSettings): void => {
     // Generate the chord deck based on settings
     const deck = generateChordDeck(settings);
     
@@ -19,7 +24,7 @@ export default function App() {
     setCurrentScreen('practice');
   };
 
-  const handleGoBack = () => {
+  const handleGoBack = (): void => {
     setCurrentScreen('home');
     setExerciseSettings(null);
     setChordDeck(null);
@@ -31,8 +36,8 @@ export default function App() {
         <HomeScreen onStartExercise={handleStartExercise} />
       ) : (
         <PianoKeyboard 
-          settings={exerciseSettings} 
-          chordDeck={chordDeck}
+          settings={exerciseSettings!} 
+          chordDeck={chordDeck!}
           onGoBack={handleGoBack} 
         />
       )}

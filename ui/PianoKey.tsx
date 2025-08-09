@@ -1,7 +1,26 @@
 import React from 'react';
 import { TouchableOpacity, Text, StyleSheet } from 'react-native';
+import type { PianoKeyComponent, KeyStyle, NoteType } from '../types';
 
-const PianoKey = ({ note, frequency, type, position, keyStyle, onPress, disabled }) => {
+interface PianoKeyProps {
+  note: string;
+  frequency: number;
+  type: NoteType;
+  position: number;
+  keyStyle?: KeyStyle;
+  onPress: (note: string, frequency: number) => void;
+  disabled?: boolean;
+}
+
+const PianoKey: PianoKeyComponent = ({ 
+  note, 
+  frequency, 
+  type, 
+  position, 
+  keyStyle = 'default', 
+  onPress, 
+  disabled = false 
+}) => {
   const isWhite = type === 'white';
   
   const getKeyStyles = () => {
@@ -16,11 +35,18 @@ const PianoKey = ({ note, frequency, type, position, keyStyle, onPress, disabled
       case 'correct':
         colorStyle = isWhite ? styles.correctWhiteKey : styles.correctBlackKey;
         break;
-      case 'expected':
+      case 'missed':
         colorStyle = isWhite ? styles.expectedWhiteKey : styles.expectedBlackKey;
         break;
-      case 'wrong':
+      case 'incorrect':
         colorStyle = isWhite ? styles.wrongWhiteKey : styles.wrongBlackKey;
+        break;
+      case 'extra':
+        colorStyle = isWhite ? styles.wrongWhiteKey : styles.wrongBlackKey;
+        break;
+      case 'default':
+      default:
+        // No additional color style
         break;
     }
     

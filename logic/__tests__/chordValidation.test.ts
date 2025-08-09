@@ -125,13 +125,13 @@ describe("getKeyStyle", () => {
       );
     });
 
-    test("returns normal for unselected keys", () => {
+    test("returns default for unselected keys", () => {
       const selectedKeys = new Set(["C4"]);
       expect(getKeyStyle("D4", selectedKeys, chordNotes, false, false)).toBe(
-        "normal"
+        "default"
       );
       expect(getKeyStyle("G4", selectedKeys, chordNotes, false, false)).toBe(
-        "normal"
+        "default"
       );
     });
   });
@@ -151,32 +151,32 @@ describe("getKeyStyle", () => {
         );
       });
 
-      test("shows unselected keys as normal", () => {
+      test("shows unselected keys as default", () => {
         const selectedKeys = new Set(["C5", "E5", "G5"]);
         expect(getKeyStyle("D4", selectedKeys, chordNotes, true, true)).toBe(
-          "normal"
+          "default"
         );
         expect(getKeyStyle("F4", selectedKeys, chordNotes, true, true)).toBe(
-          "normal"
+          "default"
         );
       });
 
       test("does not show expected notes when answer is correct", () => {
         const selectedKeys = new Set(["C5", "E5", "G5"]);
         expect(getKeyStyle("C4", selectedKeys, chordNotes, true, true)).toBe(
-          "normal"
+          "default"
         );
         expect(getKeyStyle("E4", selectedKeys, chordNotes, true, true)).toBe(
-          "normal"
+          "default"
         );
       });
     });
 
     describe("with incorrect answer", () => {
-      test("shows wrong notes as wrong", () => {
+      test("shows wrong notes as incorrect", () => {
         const selectedKeys = new Set(["C4", "F4", "G4"]);
         expect(getKeyStyle("F4", selectedKeys, chordNotes, true, false)).toBe(
-          "wrong"
+          "incorrect"
         );
       });
 
@@ -189,20 +189,20 @@ describe("getKeyStyle", () => {
         expect(getKeyStyle("G4", selectedKeys, chordNotes, true, false)).toBe(
           "correct"
         );
-        // But C5 would be wrong (right note, wrong octave)
+        // But C5 would be incorrect (right note, wrong octave)
         const selectedKeys2 = new Set(["C5", "E5", "G5"]);
         expect(getKeyStyle("C5", selectedKeys2, chordNotes, true, false)).toBe(
-          "wrong"
+          "incorrect"
         );
       });
 
       test("shows expected notes that were not selected", () => {
         const selectedKeys = new Set(["C4", "F4"]);
         expect(getKeyStyle("E4", selectedKeys, chordNotes, true, false)).toBe(
-          "expected"
+          "missed"
         );
         expect(getKeyStyle("G4", selectedKeys, chordNotes, true, false)).toBe(
-          "expected"
+          "missed"
         );
       });
     });
