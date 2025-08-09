@@ -5,14 +5,12 @@ const ChordControls = ({ showResult, isCorrect, onSubmit, onNewChord }) => {
   return (
     <View style={styles.controls}>
       <TouchableOpacity 
-        style={[
-          styles.submitButton,
-          showResult && (isCorrect ? styles.correctButton : styles.incorrectButton)
-        ]} 
+        style={styles.submitButton} 
         onPress={onSubmit}
+        disabled={showResult}
       >
-        <Text style={styles.submitButtonText}>
-          {!showResult ? 'Submit' : (isCorrect ? '✓' : '✗')}
+        <Text style={[styles.submitButtonText, showResult && styles.disabledText]}>
+          Submit
         </Text>
       </TouchableOpacity>
       <TouchableOpacity style={styles.newButton} onPress={onNewChord}>
@@ -36,11 +34,8 @@ const styles = StyleSheet.create({
     minWidth: 120,
     alignItems: 'center',
   },
-  correctButton: {
-    backgroundColor: '#27ae60',
-  },
-  incorrectButton: {
-    backgroundColor: '#e74c3c',
+  disabledText: {
+    opacity: 0.5,
   },
   submitButtonText: {
     color: 'white',

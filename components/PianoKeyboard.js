@@ -170,9 +170,23 @@ const PianoKeyboard = ({ settings, chordDeck, onGoBack }) => {
         </Text>
       </TouchableOpacity>
       
-      <View style={styles.header}>
-        <Text style={styles.chordName}>{currentChord?.name}</Text>
-        <Text style={styles.inversionText}>{getInversionName(currentInversion)}</Text>
+      <View style={[
+        styles.chordCard,
+        showResult && (isCorrect ? styles.correctCard : styles.incorrectCard)
+      ]}>
+        <View style={styles.chordCardContent}>
+          <View style={styles.iconSpace}>
+            {showResult && (
+              <Text style={styles.feedbackIcon}>
+                {isCorrect ? '✓' : '✗'}
+              </Text>
+            )}
+          </View>
+          <Text style={styles.chordText}>
+            {currentChord?.name} - {getInversionName(currentInversion)}
+          </Text>
+          <View style={styles.iconSpace} />
+        </View>
       </View>
       
       <View style={styles.keyboard}>
@@ -226,20 +240,45 @@ const styles = StyleSheet.create({
   soundToggleText: {
     fontSize: 24,
   },
-  header: {
-    marginBottom: 30,
+  chordCard: {
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: 12,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+    minHeight: 50, // Prevent layout shift
+  },
+  correctCard: {
+    backgroundColor: 'rgba(39, 174, 96, 0.2)',
+    borderColor: '#27ae60',
+  },
+  incorrectCard: {
+    backgroundColor: 'rgba(231, 76, 60, 0.2)',
+    borderColor: '#e74c3c',
+  },
+  chordCardContent: {
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
   },
-  chordName: {
-    fontSize: 36,
+  iconSpace: {
+    width: 30,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  chordText: {
+    fontSize: 24,
     fontWeight: 'bold',
-    color: 'white',
-    marginBottom: 5,
+    color: '#FFFFFF',
+    textAlign: 'center',
+    flexShrink: 1,
   },
-  inversionText: {
-    fontSize: 20,
-    color: '#ecf0f1',
-    fontStyle: 'italic',
+  feedbackIcon: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
   },
   keyboard: {
     height: 200,
