@@ -1,19 +1,6 @@
 import React from 'react';
-import { TouchableOpacity, Text, StyleSheet, View } from 'react-native';
-import type { PianoKeyComponent, KeyStyle, NoteType } from '../types';
-
-interface PianoKeyProps {
-  note: string;
-  frequency: number;
-  type: NoteType;
-  position: number;
-  keyStyle?: KeyStyle;
-  onPress: (note: string, frequency: number) => void;
-  disabled?: boolean;
-  showNoteName?: boolean;
-  width?: number;
-  height?: number;
-}
+import { TouchableOpacity, Text, StyleSheet } from 'react-native';
+import type { PianoKeyComponent } from '../types';
 
 const PianoKey: PianoKeyComponent = ({ 
   note, 

@@ -4,8 +4,7 @@ import type {
   ExerciseSettings, 
   ChordDeckItem, 
   ChordQuality, 
-  ExtensionType,
-  Chord
+  ExtensionType
 } from '../types';
 
 export type { ChordDeckItem };

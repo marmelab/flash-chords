@@ -10,7 +10,6 @@ interface ChordControlsProps {
 
 const ChordControls: React.FC<ChordControlsProps> = ({ 
   showResult, 
-  isCorrect, 
   onSubmit, 
   onNewChord 
 }) => {

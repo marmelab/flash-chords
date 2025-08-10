@@ -28,7 +28,6 @@ jest.mock('../../data/chords', () => ({
 }));
 
 import { selectRandomFromDeck } from '../deckGenerator';
-import { chords } from '../../data/chords';
 
 describe('practiceLogic', () => {
   beforeEach(() => {

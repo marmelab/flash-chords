@@ -28,40 +28,7 @@ const parseNote = (noteStr: string): ParsedNote | null => {
   return { note: match[1], octave: parseInt(match[2]) };
 };
 
-/**
- * Gets the chromatic position of a note (C=0, C#=1, D=2, etc.)
- */
-const getNotePosition = (note: string): number => {
-  const noteOrder: string[] = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
-  
-  // Map flat notes to their sharp equivalents
-  const flatToSharp: Record<string, string> = {
-    'Db': 'C#',
-    'Eb': 'D#',
-    'Gb': 'F#',
-    'Ab': 'G#',
-    'Bb': 'A#',
-    'Cb': 'B'
-  };
-  
-  // Convert flat to sharp if needed
-  const normalizedNote = flatToSharp[note] || note;
-  return noteOrder.indexOf(normalizedNote);
-};
 
-/**
- * Sorts notes by absolute pitch (considering octave and note position)
- */
-const sortByPitch = (notes: string[]): ParsedNote[] => {
-  return notes
-    .map(parseNote)
-    .filter((n): n is ParsedNote => n !== null)
-    .sort((a, b) => {
-      const aPitch = a.octave * 12 + getNotePosition(a.note);
-      const bPitch = b.octave * 12 + getNotePosition(b.note);
-      return aPitch - bPitch;
-    });
-};
 
 /**
  * Validates if the selected notes match the expected chord

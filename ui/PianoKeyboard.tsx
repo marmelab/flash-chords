@@ -67,7 +67,6 @@ const unlockOrientation = (): void => {
 };
 
 const PianoKeyboard: PianoKeyboardComponent = ({
-  settings,
   chordDeck,
   onGoBack,
   onExerciseComplete,
@@ -267,7 +266,6 @@ const PianoKeyboard: PianoKeyboardComponent = ({
 
   const getKeyPosition = (
     note: Note,
-    index: number,
     whiteKeyIndex: number
   ): number => {
     if (note.type === "white") {
@@ -304,7 +302,7 @@ const PianoKeyboard: PianoKeyboardComponent = ({
             note={note.note}
             frequency={note.freq}
             type={note.type}
-            position={getKeyPosition(note, 0, whiteKeyIndex)}
+            position={getKeyPosition(note, whiteKeyIndex)}
             keyStyle={getKeyStyle(note.note)}
             onPress={handleKeyPress}
             disabled={showResult}
@@ -326,7 +324,7 @@ const PianoKeyboard: PianoKeyboardComponent = ({
             note={note.note}
             frequency={note.freq}
             type={note.type}
-            position={getKeyPosition(note, 0, 0)}
+            position={getKeyPosition(note, 0)}
             keyStyle={getKeyStyle(note.note)}
             onPress={handleKeyPress}
             disabled={showResult}
@@ -526,13 +524,15 @@ const styles = StyleSheet.create({
     width: "100%",
     height: 8,
     backgroundColor: "rgba(255, 255, 255, 0.2)",
-    borderRadius: 4,
     overflow: "hidden",
   },
   progressFill: {
     height: "100%",
     backgroundColor: "#27ae60",
-    borderRadius: 4,
+    borderTopRightRadius: 4,
+    borderBottomRightRadius: 4,
+    marginLeft: 1,
+    marginRight: 1,
   },
 });
 

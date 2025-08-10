@@ -4,8 +4,6 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  Switch,
-  Platform,
   ScrollView,
 } from 'react-native';
 import type { 
