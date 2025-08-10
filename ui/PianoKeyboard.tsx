@@ -88,6 +88,7 @@ const PianoKeyboard: PianoKeyboardComponent = ({ settings, chordDeck, onGoBack, 
     // Update dimensions after a short delay to ensure orientation has changed
     setTimeout(updateDimensions, 100);
     
+    
     // Cleanup: unlock orientation and cleanup audio when component unmounts
     return () => {
       unlockOrientation();

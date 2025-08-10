@@ -78,6 +78,8 @@ export interface PianoKeyProps {
   onPress: (note: string, frequency: number) => void;
   disabled: boolean;
   showNoteName?: boolean;
+  width?: number;
+  height?: number;
 }
 
 // Component Props Types

@@ -63,7 +63,7 @@ describe('flashcardLogic', () => {
     });
     
     it('should return null for empty deck', () => {
-      const deck: FlashcardDeck = { cards: [], currentCard: null };
+      const deck: FlashcardDeck = { cards: [], currentCard: null, showIndex: 0 };
       const card = selectNextCard(deck);
       
       expect(card).toBeNull();
@@ -199,14 +199,15 @@ describe('flashcardLogic', () => {
   describe('getDeckStats', () => {
     it('should calculate completion percentage', () => {
       const deck = initializeFlashcardDeck(mockDeckItems);
-      deck.cards[0].probability = 0; // Completed
-      deck.cards[1].probability = 2; // Not completed
+      deck.cards[0].probability = 0; // Completed (100% progress)
+      deck.cards[1].probability = 2; // Partially completed (33% progress)
       
       const stats = getDeckStats(deck);
       
       expect(stats.totalCards).toBe(2);
       expect(stats.completedCards).toBe(1);
-      expect(stats.completionPercentage).toBe(50);
+      // Weighted progress: (100% + 33%) / 2 = 66.67% ≈ 67%
+      expect(stats.completionPercentage).toBe(67);
       expect(stats.isComplete).toBe(false);
     });
     
@@ -234,7 +235,7 @@ describe('flashcardLogic', () => {
     });
     
     it('should handle empty deck', () => {
-      const deck: FlashcardDeck = { cards: [], currentCard: null };
+      const deck: FlashcardDeck = { cards: [], currentCard: null, showIndex: 0 };
       const stats = getDeckStats(deck);
       
       expect(stats.totalCards).toBe(0);
