@@ -4,7 +4,7 @@ import * as ScreenOrientation from 'expo-screen-orientation';
 import PianoKey from './PianoKey';
 import ChordControls from './ChordControls';
 import { notes, getInversionName } from '../data/chords';
-import { initPianoAudio, playPianoNote, cleanupPianoAudio } from '../logic/pianoAudio';
+import { initPianoAudio, playPianoNote, playChord, cleanupPianoAudio } from '../logic/pianoAudio';
 import { checkAnswer, getKeyStyleForNote } from '../logic/practiceLogic';
 import { 
   initializeFlashcardDeck, 
@@ -141,6 +141,23 @@ const PianoKeyboard: PianoKeyboardComponent = ({ settings, chordDeck, onGoBack, 
     setIsCorrect(isAnswerCorrect);
     setShowResult(true);
     
+    // Play the correct chord if sound is enabled
+    if (soundEnabled && currentChord) {
+      const correctNotes = currentChord.notes[currentInversion] || [];
+      const chordNotes = correctNotes.map(noteName => {
+        const noteData = notes.find(n => n.note === noteName);
+        if (noteData) {
+          return { note: noteData.note, frequency: noteData.freq };
+        }
+        return null;
+      }).filter(n => n !== null) as Array<{ note: string; frequency: number }>;
+      
+      // Play the chord after a short delay to let the visual feedback appear first
+      setTimeout(() => {
+        playChord(chordNotes);
+      }, 200);
+    }
+    
     // Update card probability based on answer
     const cardIndex = findCardIndex(flashcardDeck, flashcardDeck.currentCard);
     const updatedDeck = updateCardProbability(flashcardDeck, cardIndex, isAnswerCorrect);
@@ -159,7 +176,7 @@ const PianoKeyboard: PianoKeyboardComponent = ({ settings, chordDeck, onGoBack, 
       // Move to next chord after delay for both correct and incorrect answers
       setTimeout(() => {
         handleGenerateNewChord(false);
-      }, isAnswerCorrect ? 1500 : 2000); // Slightly longer delay for incorrect answers
+      }, isAnswerCorrect ? 1500 : 2500); // Slightly longer delay to hear the chord
     }
   };
 

@@ -236,6 +236,20 @@ const generateSimpleTone = (frequency: number): string => {
   return btoa(binary);
 };
 
+// Play a chord (multiple notes simultaneously)
+export const playChord = async (notes: Array<{ note: string; frequency: number }>): Promise<void> => {
+  try {
+    // Play all notes of the chord simultaneously
+    const playPromises = notes.map(({ note, frequency }) => 
+      playPianoNote(note, frequency)
+    );
+    
+    await Promise.all(playPromises);
+  } catch (error) {
+    console.error("Error playing chord:", error);
+  }
+};
+
 // Cleanup function to unload all cached sounds
 export const cleanupPianoAudio = async (): Promise<void> => {
   for (const [_, sound] of soundCache) {
