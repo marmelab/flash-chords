@@ -288,19 +288,9 @@ const PianoKeyboard: PianoKeyboardComponent = ({ settings, chordDeck, onGoBack, 
         styles.chordCard,
         showResult && (isCorrect ? styles.correctCard : styles.incorrectCard)
       ]}>
-        <View style={styles.chordCardContent}>
-          <View style={styles.iconSpace}>
-            {showResult && (
-              <Text style={styles.feedbackIcon}>
-                {isCorrect ? '✓' : '✗'}
-              </Text>
-            )}
-          </View>
-          <Text style={styles.chordText}>
-            {currentChord?.name}{currentInversion !== 'root' ? ` - ${getInversionName(currentInversion)}` : ''}
-          </Text>
-          <View style={styles.iconSpace} />
-        </View>
+        <Text style={styles.chordText}>
+          {currentChord?.name}{currentInversion !== 'root' ? ` - ${getInversionName(currentInversion)}` : ''}
+        </Text>
       </View>
       
       {deckStats && (
@@ -393,6 +383,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.2)',
     minHeight: 50, // Prevent layout shift
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   correctCard: {
     backgroundColor: 'rgba(39, 174, 96, 0.2)',
@@ -402,27 +394,11 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(231, 76, 60, 0.2)',
     borderColor: '#e74c3c',
   },
-  chordCardContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  iconSpace: {
-    width: 30,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   chordText: {
     fontSize: 24,
     fontWeight: 'bold',
     color: '#FFFFFF',
     textAlign: 'center',
-    flexShrink: 1,
-  },
-  feedbackIcon: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#FFFFFF',
   },
   keyboard: {
     height: 200,
