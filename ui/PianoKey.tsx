@@ -1,5 +1,5 @@
 import React from 'react';
-import { TouchableOpacity, Text, StyleSheet } from 'react-native';
+import { TouchableOpacity, Text, StyleSheet, View } from 'react-native';
 import type { PianoKeyComponent, KeyStyle, NoteType } from '../types';
 
 interface PianoKeyProps {
@@ -24,6 +24,7 @@ const PianoKey: PianoKeyComponent = ({
   showNoteName = false 
 }) => {
   const isWhite = type === 'white';
+  const [isPressed, setIsPressed] = React.useState(false);
   
   const getKeyStyles = () => {
     const baseStyle = isWhite ? styles.whiteKey : styles.blackKey;
@@ -48,7 +49,10 @@ const PianoKey: PianoKeyComponent = ({
         break;
       case 'default':
       default:
-        // No additional color style
+        // Add pressed state for black keys
+        if (!isWhite && isPressed) {
+          colorStyle = styles.pressedBlackKey;
+        }
         break;
     }
     
@@ -58,8 +62,12 @@ const PianoKey: PianoKeyComponent = ({
   return (
     <TouchableOpacity
       style={getKeyStyles()}
-      onPress={() => onPress(note, frequency)}
-      activeOpacity={0.8}
+      onPressIn={() => {
+        if (!isWhite) setIsPressed(true);
+        if (!disabled) onPress(note, frequency);
+      }}
+      onPressOut={() => !isWhite && setIsPressed(false)}
+      activeOpacity={isWhite ? 0.8 : 1.0}
       disabled={disabled}
     >
       {showNoteName && (
@@ -76,56 +84,101 @@ const styles = StyleSheet.create({
     position: 'absolute',
     width: 50,
     height: 200,
-    backgroundColor: 'white',
+    backgroundColor: '#FAFAFA',
     borderWidth: 1,
-    borderColor: '#333',
+    borderColor: '#555',
+    borderBottomWidth: 4,
+    borderBottomColor: '#333',
+    borderRightWidth: 2,
     justifyContent: 'flex-end',
     alignItems: 'center',
     paddingBottom: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 2, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 5,
+    borderRadius: 0,
+    borderBottomLeftRadius: 4,
+    borderBottomRightRadius: 4,
   },
   selectedWhiteKey: {
-    backgroundColor: '#3498db',
+    backgroundColor: '#5DADE2',
+    borderBottomWidth: 2,
   },
   correctWhiteKey: {
-    backgroundColor: '#27ae60',
+    backgroundColor: '#58D68D',
+    borderBottomWidth: 2,
   },
   expectedWhiteKey: {
-    backgroundColor: '#95d5b2',  // Lighter green for expected keys
+    backgroundColor: '#ABEBC6',
+    borderBottomWidth: 2,
   },
   wrongWhiteKey: {
-    backgroundColor: '#e74c3c',
+    backgroundColor: '#EC7063',
+    borderBottomWidth: 2,
   },
   blackKey: {
     position: 'absolute',
     width: 30,
     height: 120,
-    backgroundColor: 'black',
+    backgroundColor: '#1A1A1A',
     justifyContent: 'flex-end',
     alignItems: 'center',
     paddingBottom: 10,
-    zIndex: 1,
+    zIndex: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 2, height: 3 },
+    shadowOpacity: 0.5,
+    shadowRadius: 3,
+    elevation: 8,
+    borderRadius: 0,
+    borderBottomLeftRadius: 3,
+    borderBottomRightRadius: 3,
+    borderBottomWidth: 4,
+    borderColor: '#0A0A0A',
   },
   selectedBlackKey: {
-    backgroundColor: '#2980b9',
+    backgroundColor: '#2E86C1',
+    borderBottomWidth: 0,
+    shadowOffset: { width: 1, height: 1 },
+    shadowOpacity: 0.3,
   },
   correctBlackKey: {
-    backgroundColor: '#229954',
+    backgroundColor: '#28B463',
+    borderBottomWidth: 0,
+    shadowOffset: { width: 1, height: 1 },
+    shadowOpacity: 0.3,
   },
   expectedBlackKey: {
-    backgroundColor: '#52b788',  // Lighter green for expected black keys
+    backgroundColor: '#52b788',
+    borderBottomWidth: 0,
+    shadowOffset: { width: 1, height: 1 },
+    shadowOpacity: 0.3,
   },
   wrongBlackKey: {
-    backgroundColor: '#c0392b',
+    backgroundColor: '#CB4335',
+    borderBottomWidth: 0,
+    shadowOffset: { width: 1, height: 1 },
+    shadowOpacity: 0.3,
+  },
+  pressedBlackKey: {
+    backgroundColor: '#2D2D2D',
+    borderBottomWidth: 0,
+    shadowOffset: { width: 1, height: 1 },
+    shadowOpacity: 0.3,
   },
   whiteKeyText: {
-    color: 'black',
-    fontSize: 12,
-    fontWeight: 'bold',
+    color: '#333',
+    fontSize: 11,
+    fontWeight: '600',
+    opacity: 0.7,
   },
   blackKeyText: {
-    color: 'white',
-    fontSize: 10,
-    fontWeight: 'bold',
+    color: '#DDD',
+    fontSize: 9,
+    fontWeight: '600',
+    opacity: 0.8,
   },
 });
 
