@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Platform } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Platform, Dimensions } from 'react-native';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import PianoKey from './PianoKey';
 import ChordControls from './ChordControls';
@@ -64,6 +64,7 @@ const PianoKeyboard: PianoKeyboardComponent = ({ settings, chordDeck, onGoBack, 
   const [showKeyNames, setShowKeyNames] = useState<boolean>(false);
   const [flashcardDeck, setFlashcardDeck] = useState<FlashcardDeck | null>(null);
   const [deckStats, setDeckStats] = useState<DeckStats | null>(null);
+  const [screenDimensions, setScreenDimensions] = useState(() => Dimensions.get('window'));
 
   useEffect(() => {
     // Lock to landscape when component mounts
@@ -76,10 +77,22 @@ const PianoKeyboard: PianoKeyboardComponent = ({ settings, chordDeck, onGoBack, 
     setFlashcardDeck(deck);
     setDeckStats(getDeckStats(deck));
     
+    // Update dimensions on orientation change
+    const updateDimensions = () => {
+      setScreenDimensions(Dimensions.get('window'));
+    };
+    
+    // Add listener for dimension changes
+    const subscription = Dimensions.addEventListener('change', updateDimensions);
+    
+    // Update dimensions after a short delay to ensure orientation has changed
+    setTimeout(updateDimensions, 100);
+    
     // Cleanup: unlock orientation and cleanup audio when component unmounts
     return () => {
       unlockOrientation();
       cleanupPianoAudio();
+      subscription?.remove();
     };
   }, []);
 
@@ -191,10 +204,24 @@ const PianoKeyboard: PianoKeyboardComponent = ({ settings, chordDeck, onGoBack, 
     );
   };
 
+  // Calculate responsive keyboard dimensions using state dimensions
+  const screenWidth = screenDimensions.width;
+  const screenHeight = screenDimensions.height;
+  
+  // Detect iPhone with notch (X and later) - they have specific aspect ratios in landscape
+  const isIPhoneWithNotch = Platform.OS === 'ios' && 
+    screenWidth > screenHeight && // Is landscape
+    (screenWidth / screenHeight > 2.1); // iPhone X+ aspect ratio in landscape
+  
+  // Add extra left margin for notch devices, minimal right margin
+  const leftMargin = isIPhoneWithNotch ? 80 : 30;
+  const rightMargin = 20;
+  const horizontalMargin = leftMargin + rightMargin;
+  const keyboardWidth = Math.min(screenWidth - horizontalMargin, 900); // Max 900px
+  const whiteKeyWidth = keyboardWidth / 14; // 14 white keys total
+  const blackKeyWidth = whiteKeyWidth * 0.6; // Black keys are 60% of white key width
+  
   const getKeyPosition = (note: Note, index: number, whiteKeyIndex: number): number => {
-    const whiteKeyWidth = 50;
-    const blackKeyWidth = 30;
-    
     if (note.type === 'white') {
       return whiteKeyIndex * whiteKeyWidth;
     }
@@ -226,6 +253,8 @@ const PianoKeyboard: PianoKeyboardComponent = ({ settings, chordDeck, onGoBack, 
             onPress={handleKeyPress}
             disabled={showResult}
             showNoteName={showKeyNames}
+            width={whiteKeyWidth}
+            height={200}
           />
         );
         whiteKeyIndex++;
@@ -246,6 +275,8 @@ const PianoKeyboard: PianoKeyboardComponent = ({ settings, chordDeck, onGoBack, 
             onPress={handleKeyPress}
             disabled={showResult}
             showNoteName={showKeyNames}
+            width={blackKeyWidth}
+            height={200}
           />
         );
       }
@@ -294,7 +325,10 @@ const PianoKeyboard: PianoKeyboardComponent = ({ settings, chordDeck, onGoBack, 
       </View>
       
       {deckStats && (
-        <View style={styles.progressContainer}>
+        <View style={[styles.progressContainer, { 
+          width: keyboardWidth,
+          marginLeft: isIPhoneWithNotch ? 30 : 0 
+        }]}>
           <View style={styles.progressBar}>
             <View 
               style={[
@@ -306,7 +340,10 @@ const PianoKeyboard: PianoKeyboardComponent = ({ settings, chordDeck, onGoBack, 
         </View>
       )}
       
-      <View style={styles.keyboard}>
+      <View style={[styles.keyboard, { 
+        width: keyboardWidth,
+        marginLeft: isIPhoneWithNotch ? 30 : 0 
+      }]}>
         {renderKeys()}
       </View>
       
@@ -402,7 +439,6 @@ const styles = StyleSheet.create({
   },
   keyboard: {
     height: 200,
-    width: 700,
     position: 'relative',
     backgroundColor: '#1a1a1a',
     borderRadius: 8,
@@ -414,7 +450,6 @@ const styles = StyleSheet.create({
     elevation: 10,
   },
   progressContainer: {
-    width: 700,
     marginTop: 10,
     marginBottom: 0,
   },

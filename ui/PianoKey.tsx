@@ -11,6 +11,8 @@ interface PianoKeyProps {
   onPress: (note: string, frequency: number) => void;
   disabled?: boolean;
   showNoteName?: boolean;
+  width?: number;
+  height?: number;
 }
 
 const PianoKey: PianoKeyComponent = ({ 
@@ -21,7 +23,9 @@ const PianoKey: PianoKeyComponent = ({
   keyStyle = 'default', 
   onPress, 
   disabled = false,
-  showNoteName = false 
+  showNoteName = false,
+  width,
+  height
 }) => {
   const isWhite = type === 'white';
   const [isPressed, setIsPressed] = React.useState(false);
@@ -29,6 +33,10 @@ const PianoKey: PianoKeyComponent = ({
   const getKeyStyles = () => {
     const baseStyle = isWhite ? styles.whiteKey : styles.blackKey;
     const positionStyle = { left: position };
+    const sizeStyle = width || height ? {
+      ...(width && { width }),
+      ...(height && { height: isWhite ? height : height * 0.6 })
+    } : {};
     
     let colorStyle = {};
     switch(keyStyle) {
@@ -56,7 +64,7 @@ const PianoKey: PianoKeyComponent = ({
         break;
     }
     
-    return [baseStyle, positionStyle, colorStyle];
+    return [baseStyle, positionStyle, sizeStyle, colorStyle];
   };
   
   return (
