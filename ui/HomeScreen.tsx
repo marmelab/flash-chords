@@ -52,6 +52,7 @@ const HomeScreen: HomeScreenComponent = ({ onStartExercise }) => {
   const [selectedQualities, setSelectedQualities] = useState<ChordQuality[]>(['major', 'minor', 'diminished', 'dominant']); // Chord qualities
   const [selectedExtensions, setSelectedExtensions] = useState<ExtensionType[]>(['triads']); // triads or sevenths
   const [selectedInversions, setSelectedInversions] = useState<string[]>(['root']); // Multiple selection, default to root
+  const [keyTab, setKeyTab] = useState<'major' | 'minor'>('major'); // Tab state for keys
 
   const handleStart = (): void => {
     // Validate selections
@@ -91,75 +92,78 @@ const HomeScreen: HomeScreenComponent = ({ onStartExercise }) => {
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.header}>
           <Text style={styles.title}>Piano Chord Practice</Text>
-          <Text style={styles.subtitle}>Configure your exercise</Text>
         </View>
 
       <View style={styles.settingsContainer}>
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Keys</Text>
-          <View style={styles.keyContainer}>
-            {keyOptions.slice(0, 12).map((key) => {
-              const isSelected = selectedKeys.includes(key.value);
-              return (
-                <TouchableOpacity
-                  key={key.value}
-                  style={[
-                    styles.keyButton,
-                    isSelected && styles.selectedKeyButton,
-                  ]}
-                  onPress={() => {
-                    if (isSelected) {
-                      // Remove key if already selected
-                      setSelectedKeys(selectedKeys.filter(k => k !== key.value));
-                    } else {
-                      // Add key if not selected
-                      setSelectedKeys([...selectedKeys, key.value]);
-                    }
-                  }}
-                >
-                  <Text
-                    style={[
-                      styles.keyButtonText,
-                      isSelected && styles.selectedKeyButtonText,
-                    ]}
-                  >
-                    {key.label}
-                  </Text>
-                </TouchableOpacity>
-              );
-            })}
+          
+          {/* Tab selector */}
+          <View style={styles.tabContainer}>
+            <TouchableOpacity
+              style={[
+                styles.tab,
+                keyTab === 'major' && styles.activeTab,
+              ]}
+              onPress={() => setKeyTab('major')}
+            >
+              <Text style={[
+                styles.tabText,
+                keyTab === 'major' && styles.activeTabText,
+              ]}>
+                Major Keys
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                styles.tab,
+                keyTab === 'minor' && styles.activeTab,
+              ]}
+              onPress={() => setKeyTab('minor')}
+            >
+              <Text style={[
+                styles.tabText,
+                keyTab === 'minor' && styles.activeTabText,
+              ]}>
+                Minor Keys
+              </Text>
+            </TouchableOpacity>
           </View>
+          
+          {/* Keys based on active tab */}
           <View style={styles.keyContainer}>
-            {keyOptions.slice(12).map((key) => {
-              const isSelected = selectedKeys.includes(key.value);
-              return (
-                <TouchableOpacity
-                  key={key.value}
-                  style={[
-                    styles.keyButton,
-                    isSelected && styles.selectedKeyButton,
-                  ]}
-                  onPress={() => {
-                    if (isSelected) {
-                      // Remove key if already selected
-                      setSelectedKeys(selectedKeys.filter(k => k !== key.value));
-                    } else {
-                      // Add key if not selected
-                      setSelectedKeys([...selectedKeys, key.value]);
-                    }
-                  }}
-                >
-                  <Text
+            {keyOptions
+              .slice(keyTab === 'major' ? 0 : 12, keyTab === 'major' ? 12 : 24)
+              .map((key) => {
+                const isSelected = selectedKeys.includes(key.value);
+                return (
+                  <TouchableOpacity
+                    key={key.value}
                     style={[
-                      styles.keyButtonText,
-                      isSelected && styles.selectedKeyButtonText,
+                      styles.keyButton,
+                      isSelected && styles.selectedKeyButton,
                     ]}
+                    onPress={() => {
+                      if (isSelected) {
+                        // Remove key if already selected
+                        setSelectedKeys(selectedKeys.filter(k => k !== key.value));
+                      } else {
+                        // Add key if not selected
+                        setSelectedKeys([...selectedKeys, key.value]);
+                      }
+                    }}
                   >
-                    {key.label}
-                  </Text>
-                </TouchableOpacity>
-              );
-            })}
+                    <Text
+                      style={[
+                        styles.keyButtonText,
+                        isSelected && styles.selectedKeyButtonText,
+                      ]}
+                    >
+                      {key.label}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
           </View>
         </View>
 
@@ -298,7 +302,7 @@ const styles = StyleSheet.create({
   },
   header: {
     alignItems: 'center',
-    marginBottom: 40,
+    marginBottom: 20,
   },
   title: {
     fontSize: 32,
@@ -313,22 +317,22 @@ const styles = StyleSheet.create({
   settingsContainer: {
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
     borderRadius: 15,
-    padding: 20,
-    marginBottom: 30,
+    padding: 15,
+    marginBottom: 20,
   },
   section: {
-    marginBottom: 30,
+    marginBottom: 15,
   },
   sectionTitle: {
     fontSize: 20,
     fontWeight: '600',
     color: 'white',
-    marginBottom: 15,
+    marginBottom: 8,
   },
   chipContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    marginTop: 10,
+    marginTop: 5,
   },
   chip: {
     paddingHorizontal: 15,
@@ -364,10 +368,35 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
   },
+  tabContainer: {
+    flexDirection: 'row',
+    marginTop: 5,
+    marginBottom: 10,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderRadius: 8,
+    padding: 4,
+  },
+  tab: {
+    flex: 1,
+    paddingVertical: 8,
+    alignItems: 'center',
+    borderRadius: 6,
+  },
+  activeTab: {
+    backgroundColor: 'rgba(52, 152, 219, 0.8)',
+  },
+  tabText: {
+    color: 'rgba(255, 255, 255, 0.6)',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  activeTabText: {
+    color: 'white',
+  },
   keyContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    marginTop: 10,
+    marginTop: 5,
   },
   keyButton: {
     minWidth: 60,
