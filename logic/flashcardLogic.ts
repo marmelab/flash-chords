@@ -120,9 +120,18 @@ export const getDeckStats = (deck: FlashcardDeck): DeckStats => {
     card => card.probability === 0
   ).length;
   
-  const completionPercentage = totalCards > 0 
-    ? Math.round((completedCards / totalCards) * 100)
-    : 0;
+  // Calculate weighted progress - cards closer to mastery contribute more
+  let totalProgress = 0;
+  if (totalCards > 0) {
+    deck.cards.forEach(card => {
+      // Convert probability to progress (0 prob = 100% progress, 3 prob = 0% progress)
+      const cardProgress = Math.max(0, (INITIAL_PROBABILITY - card.probability) / INITIAL_PROBABILITY);
+      totalProgress += cardProgress;
+    });
+    totalProgress = Math.round((totalProgress / totalCards) * 100);
+  }
+  
+  const completionPercentage = totalProgress;
   
   const isComplete = completedCards === totalCards && totalCards > 0;
   
