@@ -7,7 +7,6 @@ import {
   Switch,
   Platform,
   ScrollView,
-  SafeAreaView,
 } from 'react-native';
 import type { 
   HomeScreenComponent, 
@@ -88,7 +87,7 @@ const HomeScreen: HomeScreenComponent = ({ onStartExercise }) => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.header}>
           <Text style={styles.title}>Piano Chord Practice</Text>
@@ -283,7 +282,7 @@ const HomeScreen: HomeScreenComponent = ({ onStartExercise }) => {
           <Text style={styles.startButtonText}>Start Practice</Text>
         </TouchableOpacity>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 };
 

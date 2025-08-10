@@ -5,7 +5,16 @@ import PianoKey from './PianoKey';
 import ChordControls from './ChordControls';
 import { notes, getInversionName } from '../data/chords';
 import { initAudio, playTone } from '../logic/audio';
-import { generateNewChord, checkAnswer, getKeyStyleForNote } from '../logic/practiceLogic';
+import { checkAnswer, getKeyStyleForNote } from '../logic/practiceLogic';
+import { 
+  initializeFlashcardDeck, 
+  selectNextCard, 
+  updateCardProbability, 
+  getDeckStats, 
+  findCardIndex,
+  type FlashcardDeck,
+  type DeckStats 
+} from '../logic/flashcardLogic';
 import type { 
   PianoKeyboardComponent, 
   Chord, 
@@ -45,20 +54,26 @@ const unlockOrientation = (): void => {
     });
 };
 
-const PianoKeyboard: PianoKeyboardComponent = ({ settings, chordDeck, onGoBack }) => {
+const PianoKeyboard: PianoKeyboardComponent = ({ settings, chordDeck, onGoBack, onExerciseComplete }) => {
   const [selectedKeys, setSelectedKeys] = useState<Set<string>>(new Set());
   const [currentChord, setCurrentChord] = useState<Chord | null>(null);
   const [currentInversion, setCurrentInversion] = useState<InversionType>('root');
   const [showResult, setShowResult] = useState<boolean>(false);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
   const [soundEnabled, setSoundEnabled] = useState<boolean>(true);
+  const [flashcardDeck, setFlashcardDeck] = useState<FlashcardDeck | null>(null);
+  const [deckStats, setDeckStats] = useState<DeckStats | null>(null);
 
   useEffect(() => {
     // Lock to landscape when component mounts
     lockToLandscape();
     
     initAudio();
-    handleGenerateNewChord();
+    
+    // Initialize flashcard deck
+    const deck = initializeFlashcardDeck(chordDeck);
+    setFlashcardDeck(deck);
+    setDeckStats(getDeckStats(deck));
     
     // Cleanup: unlock orientation when component unmounts
     return () => {
@@ -66,15 +81,28 @@ const PianoKeyboard: PianoKeyboardComponent = ({ settings, chordDeck, onGoBack }
     };
   }, []);
 
+  useEffect(() => {
+    if (flashcardDeck && !currentChord) {
+      handleGenerateNewChord();
+    }
+  }, [flashcardDeck]);
+
   const handleGenerateNewChord = (): void => {
-    const result = generateNewChord(chordDeck);
-    if (result) {
-      const { chord, inversion } = result;
-      setCurrentChord(chord);
-      setCurrentInversion(inversion);
+    if (!flashcardDeck) return;
+    
+    const nextCard = selectNextCard(flashcardDeck);
+    if (nextCard) {
+      setCurrentChord(nextCard.chord);
+      setCurrentInversion(nextCard.inversion);
       setSelectedKeys(new Set());
       setShowResult(false);
       setIsCorrect(null);
+      
+      // Update current card in deck
+      setFlashcardDeck({
+        ...flashcardDeck,
+        currentCard: nextCard
+      });
     }
   };
 
@@ -95,15 +123,32 @@ const PianoKeyboard: PianoKeyboardComponent = ({ settings, chordDeck, onGoBack }
   };
 
   const handleCheckAnswer = (): void => {
+    if (!flashcardDeck || !flashcardDeck.currentCard) return;
+    
     const isAnswerCorrect = checkAnswer(selectedKeys, currentChord, currentInversion);
     
     setIsCorrect(isAnswerCorrect);
     setShowResult(true);
     
-    if (isAnswerCorrect) {
+    // Update card probability based on answer
+    const cardIndex = findCardIndex(flashcardDeck, flashcardDeck.currentCard);
+    const updatedDeck = updateCardProbability(flashcardDeck, cardIndex, isAnswerCorrect);
+    setFlashcardDeck(updatedDeck);
+    
+    // Update deck stats
+    const newStats = getDeckStats(updatedDeck);
+    setDeckStats(newStats);
+    
+    // Check if exercise is complete
+    if (newStats.isComplete) {
+      setTimeout(() => {
+        onExerciseComplete(newStats);
+      }, 1500);
+    } else {
+      // Move to next chord after delay for both correct and incorrect answers
       setTimeout(() => {
         handleGenerateNewChord();
-      }, 1500);
+      }, isAnswerCorrect ? 1500 : 2000); // Slightly longer delay for incorrect answers
     }
   };
 
@@ -200,6 +245,19 @@ const PianoKeyboard: PianoKeyboardComponent = ({ settings, chordDeck, onGoBack }
         </Text>
       </TouchableOpacity>
       
+      {deckStats && (
+        <View style={styles.progressContainer}>
+          <View style={styles.progressBar}>
+            <View 
+              style={[
+                styles.progressFill,
+                { width: `${deckStats.completionPercentage}%` }
+              ]} 
+            />
+          </View>
+        </View>
+      )}
+      
       <View style={[
         styles.chordCard,
         showResult && (isCorrect ? styles.correctCard : styles.incorrectCard)
@@ -242,7 +300,7 @@ const styles = StyleSheet.create({
   },
   backButton: {
     position: 'absolute',
-    top: 40,
+    top: 10,
     left: 20,
     backgroundColor: 'rgba(255, 255, 255, 0.2)',
     borderRadius: 8,
@@ -257,7 +315,7 @@ const styles = StyleSheet.create({
   },
   soundToggle: {
     position: 'absolute',
-    top: 40,
+    top: 10,
     right: 20,
     backgroundColor: 'rgba(255, 255, 255, 0.2)',
     borderRadius: 25,
@@ -314,6 +372,25 @@ const styles = StyleSheet.create({
     height: 200,
     width: 700,
     position: 'relative',
+  },
+  progressContainer: {
+    position: 'absolute',
+    top: 10,
+    left: 20,
+    right: 20,
+    zIndex: 10,
+  },
+  progressBar: {
+    width: '100%',
+    height: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    borderRadius: 4,
+    overflow: 'hidden',
+  },
+  progressFill: {
+    height: '100%',
+    backgroundColor: '#27ae60',
+    borderRadius: 4,
   },
 });
 

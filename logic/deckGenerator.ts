@@ -8,6 +8,8 @@ import type {
   Chord
 } from '../types';
 
+export type { ChordDeckItem };
+
 /**
  * Determine the quality of a chord from its name
  */

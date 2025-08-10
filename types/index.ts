@@ -95,6 +95,7 @@ export interface PianoKeyboardProps {
   settings: ExerciseSettings;
   chordDeck: ChordDeckItem[];
   onGoBack: () => void;
+  onExerciseComplete: (stats: any) => void;
 }
 
 // Practice Logic Types
@@ -120,7 +121,7 @@ export interface AudioContextState {
 }
 
 // Screen Types
-export type ScreenType = 'home' | 'practice';
+export type ScreenType = 'home' | 'practice' | 'summary';
 
 // Validation Types
 export interface ValidationResult {
