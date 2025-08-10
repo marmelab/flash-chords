@@ -4,11 +4,13 @@ export interface FlashcardItem extends ChordDeckItem {
   probability: number;
   attempts: number;
   correctAttempts: number;
+  lastShownIndex?: number; // Track when card was last shown
 }
 
 export interface FlashcardDeck {
   cards: FlashcardItem[];
   currentCard: FlashcardItem | null;
+  showIndex: number; // Track total cards shown
 }
 
 export interface DeckStats {
@@ -22,6 +24,9 @@ export interface DeckStats {
 const INITIAL_PROBABILITY = 3;
 const MIN_PROBABILITY = 0;  // 0 means card is removed from rotation
 const MAX_PROBABILITY = 10;
+const COOLDOWN_PERIOD = 3; // Minimum cards between repeats
+const INCORRECT_PENALTY = 2; // How much to increase probability on failure
+const CORRECT_REWARD = 1; // How much to decrease probability on success
 
 export const initializeFlashcardDeck = (deck: ChordDeckItem[]): FlashcardDeck => {
   const cards = deck.map(item => ({
@@ -29,11 +34,13 @@ export const initializeFlashcardDeck = (deck: ChordDeckItem[]): FlashcardDeck =>
     probability: INITIAL_PROBABILITY,
     attempts: 0,
     correctAttempts: 0,
+    lastShownIndex: -999, // Never shown
   }));
   
   return {
     cards,
     currentCard: null,
+    showIndex: 0,
   };
 };
 
@@ -45,22 +52,37 @@ export const selectNextCard = (deck: FlashcardDeck): FlashcardItem | null => {
   
   if (activeCards.length === 0) return null;
   
+  // Dynamically adjust cooldown based on number of active cards
+  // If we have fewer active cards, reduce the cooldown period
+  const effectiveCooldown = Math.min(COOLDOWN_PERIOD, Math.max(1, activeCards.length - 1));
+  
+  // Further filter cards in cooldown period (shown too recently)
+  const availableCards = activeCards.filter(card => {
+    const cardsSinceLastShown = deck.showIndex - (card.lastShownIndex ?? -999);
+    return cardsSinceLastShown >= effectiveCooldown;
+  });
+  
+  // If all cards are in cooldown (shouldn't happen with dynamic cooldown), use all active cards
+  const cardsToChooseFrom = availableCards.length > 0 ? availableCards : activeCards;
+  
   // Calculate total weight
-  const totalWeight = activeCards.reduce((sum, card) => sum + card.probability, 0);
+  const totalWeight = cardsToChooseFrom.reduce((sum, card) => sum + card.probability, 0);
   
   // Generate random value
   let random = Math.random() * totalWeight;
   
   // Select card based on weighted probability
-  for (const card of activeCards) {
+  for (const card of cardsToChooseFrom) {
     random -= card.probability;
     if (random <= 0) {
+      // Update the card's last shown index
+      card.lastShownIndex = deck.showIndex;
       return card;
     }
   }
   
   // Fallback (should never reach here)
-  return activeCards[0];
+  return cardsToChooseFrom[0];
 };
 
 export const updateCardProbability = (
@@ -78,16 +100,17 @@ export const updateCardProbability = (
   if (isCorrect) {
     card.correctAttempts++;
     // Decrease probability for correct answer (down to 0)
-    card.probability = Math.max(MIN_PROBABILITY, card.probability - 1);
+    card.probability = Math.max(MIN_PROBABILITY, card.probability - CORRECT_REWARD);
   } else {
     // Increase probability for incorrect answer
     // This resets the "streak" - card needs consecutive correct answers to reach 0
-    card.probability = Math.min(MAX_PROBABILITY, card.probability + 2);
+    card.probability = Math.min(MAX_PROBABILITY, card.probability + INCORRECT_PENALTY);
   }
   
   return {
     ...deck,
     cards: updatedCards,
+    showIndex: deck.showIndex + 1, // Increment show counter
   };
 };
 
