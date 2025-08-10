@@ -61,6 +61,7 @@ const PianoKeyboard: PianoKeyboardComponent = ({ settings, chordDeck, onGoBack, 
   const [showResult, setShowResult] = useState<boolean>(false);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
   const [soundEnabled, setSoundEnabled] = useState<boolean>(true);
+  const [showKeyNames, setShowKeyNames] = useState<boolean>(false);
   const [flashcardDeck, setFlashcardDeck] = useState<FlashcardDeck | null>(null);
   const [deckStats, setDeckStats] = useState<DeckStats | null>(null);
 
@@ -83,14 +84,23 @@ const PianoKeyboard: PianoKeyboardComponent = ({ settings, chordDeck, onGoBack, 
 
   useEffect(() => {
     if (flashcardDeck && !currentChord) {
-      handleGenerateNewChord();
+      handleGenerateNewChord(false);
     }
   }, [flashcardDeck]);
 
-  const handleGenerateNewChord = (): void => {
+  const handleGenerateNewChord = (isSkip: boolean = false): void => {
     if (!flashcardDeck) return;
     
-    const nextCard = selectNextCard(flashcardDeck);
+    // If skipping, increase probability for current card (treat like incorrect)
+    if (isSkip && flashcardDeck.currentCard) {
+      const cardIndex = findCardIndex(flashcardDeck, flashcardDeck.currentCard);
+      const updatedDeck = updateCardProbability(flashcardDeck, cardIndex, false);
+      setFlashcardDeck(updatedDeck);
+      setDeckStats(getDeckStats(updatedDeck));
+    }
+    
+    const deckToUse = isSkip && flashcardDeck.currentCard ? flashcardDeck : flashcardDeck;
+    const nextCard = selectNextCard(deckToUse);
     if (nextCard) {
       setCurrentChord(nextCard.chord);
       setCurrentInversion(nextCard.inversion);
@@ -100,7 +110,7 @@ const PianoKeyboard: PianoKeyboardComponent = ({ settings, chordDeck, onGoBack, 
       
       // Update current card in deck
       setFlashcardDeck({
-        ...flashcardDeck,
+        ...deckToUse,
         currentCard: nextCard
       });
     }
@@ -147,7 +157,7 @@ const PianoKeyboard: PianoKeyboardComponent = ({ settings, chordDeck, onGoBack, 
     } else {
       // Move to next chord after delay for both correct and incorrect answers
       setTimeout(() => {
-        handleGenerateNewChord();
+        handleGenerateNewChord(false);
       }, isAnswerCorrect ? 1500 : 2000); // Slightly longer delay for incorrect answers
     }
   };
@@ -197,6 +207,7 @@ const PianoKeyboard: PianoKeyboardComponent = ({ settings, chordDeck, onGoBack, 
             keyStyle={getKeyStyle(note.note)}
             onPress={handleKeyPress}
             disabled={showResult}
+            showNoteName={showKeyNames}
           />
         );
         whiteKeyIndex++;
@@ -216,6 +227,7 @@ const PianoKeyboard: PianoKeyboardComponent = ({ settings, chordDeck, onGoBack, 
             keyStyle={getKeyStyle(note.note)}
             onPress={handleKeyPress}
             disabled={showResult}
+            showNoteName={showKeyNames}
           />
         );
       }
@@ -233,7 +245,7 @@ const PianoKeyboard: PianoKeyboardComponent = ({ settings, chordDeck, onGoBack, 
           onGoBack();
         }}
       >
-        <Text style={styles.backButtonText}>← Back</Text>
+        <Text style={styles.backButtonText}>‹</Text>
       </TouchableOpacity>
       
       <TouchableOpacity 
@@ -245,18 +257,14 @@ const PianoKeyboard: PianoKeyboardComponent = ({ settings, chordDeck, onGoBack, 
         </Text>
       </TouchableOpacity>
       
-      {deckStats && (
-        <View style={styles.progressContainer}>
-          <View style={styles.progressBar}>
-            <View 
-              style={[
-                styles.progressFill,
-                { width: `${deckStats.completionPercentage}%` }
-              ]} 
-            />
-          </View>
-        </View>
-      )}
+      <TouchableOpacity 
+        style={styles.keyNamesToggle}
+        onPress={() => setShowKeyNames(!showKeyNames)}
+      >
+        <Text style={styles.keyNamesToggleText}>
+          {showKeyNames ? 'ABC' : 'abc'}
+        </Text>
+      </TouchableOpacity>
       
       <View style={[
         styles.chordCard,
@@ -271,11 +279,24 @@ const PianoKeyboard: PianoKeyboardComponent = ({ settings, chordDeck, onGoBack, 
             )}
           </View>
           <Text style={styles.chordText}>
-            {currentChord?.name} - {getInversionName(currentInversion)}
+            {currentChord?.name}{currentInversion !== 'root' ? ` - ${getInversionName(currentInversion)}` : ''}
           </Text>
           <View style={styles.iconSpace} />
         </View>
       </View>
+      
+      {deckStats && (
+        <View style={styles.progressContainer}>
+          <View style={styles.progressBar}>
+            <View 
+              style={[
+                styles.progressFill,
+                { width: `${deckStats.completionPercentage}%` }
+              ]} 
+            />
+          </View>
+        </View>
+      )}
       
       <View style={styles.keyboard}>
         {renderKeys()}
@@ -285,7 +306,7 @@ const PianoKeyboard: PianoKeyboardComponent = ({ settings, chordDeck, onGoBack, 
         showResult={showResult}
         isCorrect={isCorrect}
         onSubmit={handleCheckAnswer}
-        onNewChord={handleGenerateNewChord}
+        onNewChord={() => handleGenerateNewChord(true)}
       />
     </View>
   );
@@ -302,23 +323,23 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 10,
     left: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    borderRadius: 8,
-    paddingHorizontal: 15,
-    paddingVertical: 10,
+    backgroundColor: 'transparent',
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
     zIndex: 10,
   },
   backButtonText: {
     color: 'white',
-    fontSize: 16,
-    fontWeight: '600',
+    fontSize: 40,
+    fontWeight: '200',
   },
   soundToggle: {
     position: 'absolute',
     top: 10,
     right: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    borderRadius: 25,
+    backgroundColor: 'transparent',
     width: 50,
     height: 50,
     justifyContent: 'center',
@@ -328,12 +349,29 @@ const styles = StyleSheet.create({
   soundToggleText: {
     fontSize: 24,
   },
+  keyNamesToggle: {
+    position: 'absolute',
+    top: 10,
+    right: 80,
+    backgroundColor: 'transparent',
+    width: 50,
+    height: 50,
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 10,
+  },
+  keyNamesToggleText: {
+    fontSize: 20,
+    color: 'white',
+    fontWeight: '600',
+  },
   chordCard: {
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
     borderRadius: 12,
     paddingHorizontal: 20,
     paddingVertical: 12,
-    marginBottom: 20,
+    marginBottom: 10,
+    marginTop: 20, // Reduced to move everything up
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.2)',
     minHeight: 50, // Prevent layout shift
@@ -374,11 +412,9 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   progressContainer: {
-    position: 'absolute',
-    top: 10,
-    left: 20,
-    right: 20,
-    zIndex: 10,
+    width: 700,
+    marginTop: 10,
+    marginBottom: 0,
   },
   progressBar: {
     width: '100%',

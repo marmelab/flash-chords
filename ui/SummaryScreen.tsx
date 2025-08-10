@@ -40,7 +40,7 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({ deckStats, onGoHome }) =>
           }
         }}
       >
-        <Text style={styles.backButtonText}>← Back to Home</Text>
+        <Text style={styles.backButtonText}>‹</Text>
       </TouchableOpacity>
       
       <ScrollView 
@@ -113,16 +113,17 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 10,
     left: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    borderRadius: 8,
-    paddingHorizontal: 15,
-    paddingVertical: 10,
+    backgroundColor: 'transparent',
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
     zIndex: 10,
   },
   backButtonText: {
     color: 'white',
-    fontSize: 16,
-    fontWeight: '600',
+    fontSize: 40,
+    fontWeight: '200',
   },
   scrollContainer: {
     flex: 1,

@@ -10,6 +10,7 @@ interface PianoKeyProps {
   keyStyle?: KeyStyle;
   onPress: (note: string, frequency: number) => void;
   disabled?: boolean;
+  showNoteName?: boolean;
 }
 
 const PianoKey: PianoKeyComponent = ({ 
@@ -19,7 +20,8 @@ const PianoKey: PianoKeyComponent = ({
   position, 
   keyStyle = 'default', 
   onPress, 
-  disabled = false 
+  disabled = false,
+  showNoteName = false 
 }) => {
   const isWhite = type === 'white';
   
@@ -60,9 +62,11 @@ const PianoKey: PianoKeyComponent = ({
       activeOpacity={0.8}
       disabled={disabled}
     >
-      <Text style={isWhite ? styles.whiteKeyText : styles.blackKeyText}>
-        {note.replace(/[0-9]/g, '')}
-      </Text>
+      {showNoteName && (
+        <Text style={isWhite ? styles.whiteKeyText : styles.blackKeyText}>
+          {note.replace(/[0-9]/g, '')}
+        </Text>
+      )}
     </TouchableOpacity>
   );
 };

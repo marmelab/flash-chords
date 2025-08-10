@@ -77,6 +77,7 @@ export interface PianoKeyProps {
   keyStyle: string;
   onPress: (note: string, frequency: number) => void;
   disabled: boolean;
+  showNoteName?: boolean;
 }
 
 // Component Props Types

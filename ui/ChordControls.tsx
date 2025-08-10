@@ -22,11 +22,11 @@ const ChordControls: React.FC<ChordControlsProps> = ({
         disabled={showResult}
       >
         <Text style={[styles.submitButtonText, showResult && styles.disabledText]}>
-          Submit
+          ✓ Submit
         </Text>
       </TouchableOpacity>
-      <TouchableOpacity style={styles.newButton} onPress={onNewChord}>
-        <Text style={styles.newButtonText}>New Chord</Text>
+      <TouchableOpacity style={styles.skipButton} onPress={onNewChord}>
+        <Text style={styles.skipButtonText}>↻</Text>
       </TouchableOpacity>
     </View>
   );
@@ -35,8 +35,8 @@ const ChordControls: React.FC<ChordControlsProps> = ({
 const styles = StyleSheet.create({
   controls: {
     flexDirection: 'row',
-    marginTop: 40,
-    gap: 20,
+    marginTop: 20,
+    gap: 15,
   },
   submitButton: {
     backgroundColor: '#27ae60',
@@ -54,16 +54,20 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
   },
-  newButton: {
-    backgroundColor: '#8e44ad',
-    paddingHorizontal: 30,
-    paddingVertical: 15,
+  skipButton: {
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    width: 60,
+    height: 53,
     borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
   },
-  newButtonText: {
+  skipButtonText: {
     color: 'white',
-    fontSize: 18,
-    fontWeight: 'bold',
+    fontSize: 24,
+    fontWeight: '400',
   },
 });
 
