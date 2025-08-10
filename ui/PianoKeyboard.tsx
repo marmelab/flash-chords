@@ -4,7 +4,7 @@ import * as ScreenOrientation from 'expo-screen-orientation';
 import PianoKey from './PianoKey';
 import ChordControls from './ChordControls';
 import { notes, getInversionName } from '../data/chords';
-import { initAudio, playTone } from '../logic/audio';
+import { initPianoAudio, playPianoNote, cleanupPianoAudio } from '../logic/pianoAudio';
 import { checkAnswer, getKeyStyleForNote } from '../logic/practiceLogic';
 import { 
   initializeFlashcardDeck, 
@@ -69,16 +69,17 @@ const PianoKeyboard: PianoKeyboardComponent = ({ settings, chordDeck, onGoBack, 
     // Lock to landscape when component mounts
     lockToLandscape();
     
-    initAudio();
+    initPianoAudio();
     
     // Initialize flashcard deck
     const deck = initializeFlashcardDeck(chordDeck);
     setFlashcardDeck(deck);
     setDeckStats(getDeckStats(deck));
     
-    // Cleanup: unlock orientation when component unmounts
+    // Cleanup: unlock orientation and cleanup audio when component unmounts
     return () => {
       unlockOrientation();
+      cleanupPianoAudio();
     };
   }, []);
 
@@ -120,7 +121,7 @@ const PianoKeyboard: PianoKeyboardComponent = ({ settings, chordDeck, onGoBack, 
     if (showResult) return;
     
     if (soundEnabled) {
-      playTone(frequency);
+      playPianoNote(note, frequency);
     }
     
     const newSelectedKeys = new Set(selectedKeys);
