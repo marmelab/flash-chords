@@ -1,8 +1,38 @@
 import { Audio } from "expo-av";
+import { notes } from "../data/chords";
 
 // Cache for loaded sounds to improve performance
 const soundCache: Map<string, Audio.Sound> = new Map();
 let isInitialized = false;
+
+// Pre-generate all piano notes in background (non-blocking)
+const preGenerateAllNotes = (): void => {
+  // Add C6 which is not in the imported notes array
+  const allNotes = [
+    ...notes,
+    { note: "C6", freq: 1046.5, type: "white" as const },
+  ];
+
+  // Generate notes in background, don't await
+  allNotes.forEach(async ({ note, freq }) => {
+    if (!soundCache.has(note)) {
+      try {
+        const { sound } = await Audio.Sound.createAsync(
+          { uri: `data:audio/wav;base64,${generatePianoTone(freq)}` },
+          { shouldPlay: false, volume: 1.0 }
+        );
+        soundCache.set(note, sound);
+      } catch (error) {
+        console.log("Error pre-generating note:", note, error);
+      }
+    }
+  });
+};
+
+// Check if audio system is initialized
+export const isAudioReady = (): boolean => {
+  return isInitialized;
+};
 
 export const initPianoAudio = async (): Promise<void> => {
   if (isInitialized) return;
@@ -17,6 +47,9 @@ export const initPianoAudio = async (): Promise<void> => {
   });
 
   isInitialized = true;
+  
+  // Start pre-generating notes in background (non-blocking)
+  preGenerateAllNotes();
 };
 
 // Enhanced piano synthesis with multiple harmonics and proper ADSR envelope
@@ -165,11 +198,12 @@ const generatePianoTone = (frequency: number): string => {
   // Combine header and samples
   const data = header.concat(samples);
 
-  // Convert to base64
-  let binary = "";
+  // Convert to base64 more efficiently using array
+  const binaryArray = new Array(data.length);
   for (let i = 0; i < data.length; i++) {
-    binary += String.fromCharCode(data[i]);
+    binaryArray[i] = String.fromCharCode(data[i]);
   }
+  const binary = binaryArray.join("");
 
   return btoa(binary);
 };
@@ -211,71 +245,19 @@ export const playPianoNote = async (
       soundCache.set(note, sound);
     }
 
-    // Stop and reset if already playing - do this quickly
-    const status = await sound.getStatusAsync();
-    if (status.isLoaded && status.isPlaying) {
-      await sound.stopAsync();
-    }
-    if (status.isLoaded) {
+    // Reset and play without checking status for better performance
+    try {
       await sound.setPositionAsync(0);
+      await sound.playAsync();
+    } catch (error) {
+      // If error, try stop then play
+      await sound.stopAsync();
+      await sound.setPositionAsync(0);
+      await sound.playAsync();
     }
-
-    // Play the sound immediately
-    await sound.playAsync();
   } catch (error) {
     console.error("Error playing piano note:", error);
-    // Fallback to simple tone if enhanced version fails
-    playSimpleTone(frequency);
   }
-};
-
-// Fallback simple tone generator
-const playSimpleTone = async (frequency: number): Promise<void> => {
-  try {
-    const { sound } = await Audio.Sound.createAsync(
-      { uri: `data:audio/wav;base64,${generateSimpleTone(frequency)}` },
-      { shouldPlay: true }
-    );
-
-    setTimeout(async () => {
-      await sound.unloadAsync();
-    }, 500);
-  } catch (error) {
-    console.error("Error playing simple tone:", error);
-  }
-};
-
-// Simple tone generator as fallback
-const generateSimpleTone = (frequency: number): string => {
-  const sampleRate = 44100;
-  const duration = 0.3;
-  const numSamples = sampleRate * duration;
-  const amplitude = 0.3;
-
-  const header: number[] = [
-    0x52, 0x49, 0x46, 0x46, 0x24, 0x08, 0x00, 0x00, 0x57, 0x41, 0x56, 0x45,
-    0x66, 0x6d, 0x74, 0x20, 0x10, 0x00, 0x00, 0x00, 0x01, 0x00, 0x01, 0x00,
-    0x44, 0xac, 0x00, 0x00, 0x88, 0x58, 0x01, 0x00, 0x02, 0x00, 0x10, 0x00,
-    0x64, 0x61, 0x74, 0x61, 0x00, 0x08, 0x00, 0x00,
-  ];
-
-  const samples: number[] = [];
-  for (let i = 0; i < numSamples; i++) {
-    const t = i / sampleRate;
-    const value = Math.sin(2 * Math.PI * frequency * t) * amplitude;
-    const envelope = Math.exp(-t * 3);
-    const sample = Math.round(value * envelope * 32767);
-    samples.push(sample & 0xff);
-    samples.push((sample >> 8) & 0xff);
-  }
-
-  const data = header.concat(samples);
-  let binary = "";
-  for (let i = 0; i < data.length; i++) {
-    binary += String.fromCharCode(data[i]);
-  }
-
-  return btoa(binary);
 };
 
 // Play a chord (multiple notes simultaneously)

@@ -87,11 +87,14 @@ const PianoKeyboard: PianoKeyboardComponent = ({
     Dimensions.get("window")
   );
 
+  // Initialize audio system if not already done
+  useEffect(() => {
+    initPianoAudio();
+  }, []);
+
   useEffect(() => {
     // Lock to landscape when component mounts
     lockToLandscape();
-
-    initPianoAudio();
 
     // Initialize flashcard deck
     const deck = initializeFlashcardDeck(chordDeck);

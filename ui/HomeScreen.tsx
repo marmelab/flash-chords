@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   ScrollView,
 } from 'react-native';
+import { initPianoAudio } from '../logic/pianoAudio';
 import type { 
   HomeScreenComponent, 
   KeyOption, 
@@ -51,6 +52,11 @@ const HomeScreen: HomeScreenComponent = ({ onStartExercise }) => {
   const [selectedExtensions, setSelectedExtensions] = useState<ExtensionType[]>(['triads']); // triads or sevenths
   const [selectedInversions, setSelectedInversions] = useState<string[]>(['root']); // Multiple selection, default to root
   const [keyTab, setKeyTab] = useState<'major' | 'minor'>('major'); // Tab state for keys
+
+  // Pre-initialize piano audio when the home screen loads
+  useEffect(() => {
+    initPianoAudio();
+  }, []);
 
   const handleStart = (): void => {
     // Validate selections
