@@ -37,9 +37,9 @@ describe("validateChord", () => {
       expect(validateChord(["C5", "E4", "G5"], expectedNotes)).toBe(false);
     });
 
-    test("rejects notes in different order", () => {
-      expect(validateChord(["E4", "G4", "C4"], expectedNotes)).toBe(false);
-      expect(validateChord(["G5", "C5", "E5"], expectedNotes)).toBe(false);
+    test("accepts notes in different order", () => {
+      expect(validateChord(["E4", "G4", "C4"], expectedNotes)).toBe(true);
+      expect(validateChord(["G4", "C4", "E4"], expectedNotes)).toBe(true);
     });
 
     test("rejects wrong notes", () => {
@@ -224,8 +224,8 @@ describe("getKeyStyle", () => {
 
       it('should handle Cb as equivalent to B', () => {
         const selectedNotes = ['Cb4', 'Eb4', 'Gb4']; // Cb major
-        const expectedNotes = ['B3', 'D#4', 'F#4']; // B major (enharmonic, different octave)
-        expect(validateChord(selectedNotes, expectedNotes)).toBe(false); // Different octave
+        const expectedNotes = ['B4', 'D#4', 'F#4']; // B major (enharmonic)
+        expect(validateChord(selectedNotes, expectedNotes)).toBe(true); // Enharmonic equivalents with same octaves
       });
 
       it('should handle mixed enharmonics in a chord', () => {
@@ -236,7 +236,7 @@ describe("getKeyStyle", () => {
     });
 
     describe('validateChord with malformed input', () => {
-      it('should handle notes without octave numbers', () => {
+      it('should reject notes without octave numbers', () => {
         const selectedNotes = ['C', 'E', 'G'];
         const expectedNotes = ['C4', 'E4', 'G4'];
         expect(validateChord(selectedNotes, expectedNotes)).toBe(false);
@@ -386,7 +386,7 @@ describe("getKeyStyle", () => {
       it('should handle chord with many duplicated notes', () => {
         const selectedNotes = ['C4', 'C5', 'E4', 'E5', 'G4', 'G5']; // Doubled voicing
         const expectedNotes = ['C4', 'E4', 'G4', 'C5', 'E5', 'G5'];
-        expect(validateChord(selectedNotes, expectedNotes)).toBe(false); // Order matters
+        expect(validateChord(selectedNotes, expectedNotes)).toBe(true); // Order doesn't matter, octaves match
       });
     });
   });

@@ -120,9 +120,9 @@ describe('practiceLogic', () => {
     });
 
     it('should return false for wrong inversion', () => {
-      const selectedKeys = new Set(['E4', 'G4', 'C5']); // First inversion
-      const result = checkAnswer(selectedKeys, mockChord, 'root'); // Expecting root
-      expect(result).toBe(false);
+      const selectedKeys = new Set(['E4', 'G4', 'C5']); // First inversion notes
+      const result = checkAnswer(selectedKeys, mockChord, 'root'); // Expecting root position
+      expect(result).toBe(false); // Wrong octaves for root position
     });
 
     it('should return false when chord is null', () => {

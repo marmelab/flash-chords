@@ -69,27 +69,42 @@ export const validateChord: NoteValidator = (selectedNotes: string[], expectedNo
     return enharmonics[note1] === note2;
   };
   
-  // Check if notes match in the same order (ignoring octave, considering enharmonics)
-  const notesMatchInOrder = selectedParsed.every((selected, index) => 
-    areNotesEquivalent(selected.note, expectedParsed[index].note)
+  // Sort both arrays by pitch to match them regardless of playing order
+  const sortByPitch = (a: ParsedNote, b: ParsedNote) => {
+    const noteOrder = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+    const flatToSharp: Record<string, string> = {
+      'Db': 'C#', 'Eb': 'D#', 'Gb': 'F#', 'Ab': 'G#', 'Bb': 'A#', 'Cb': 'B'
+    };
+    const aNormalized = flatToSharp[a.note] || a.note;
+    const bNormalized = flatToSharp[b.note] || b.note;
+    const aPitch = a.octave * 12 + noteOrder.indexOf(aNormalized);
+    const bPitch = b.octave * 12 + noteOrder.indexOf(bNormalized);
+    return aPitch - bPitch;
+  };
+  
+  const selectedSorted = [...selectedParsed].sort(sortByPitch);
+  const expectedSorted = [...expectedParsed].sort(sortByPitch);
+  
+  // Check that all notes match (allowing for enharmonic equivalents)
+  const notesMatch = selectedSorted.every((selected, index) => 
+    areNotesEquivalent(selected.note, expectedSorted[index].note)
   );
-
-  if (!notesMatchInOrder) {
+  
+  if (!notesMatch) {
     return false;
   }
-
-  // Check that all notes are transposed by the same amount
-  // (all in the same octave relative to the original)
-  const octaveDifferences = selectedParsed.map((selected, index) => 
-    selected.octave - expectedParsed[index].octave
+  
+  // Check that all notes are transposed by the same amount (preserving inversion)
+  const octaveDifferences = selectedSorted.map((selected, index) => 
+    selected.octave - expectedSorted[index].octave
   );
-
-  // All octave differences should be the same
+  
+  // All octave differences should be the same (uniform transposition)
   const allSameOctaveShift = octaveDifferences.every(diff => 
     diff === octaveDifferences[0]
   );
-
-  return notesMatchInOrder && allSameOctaveShift;
+  
+  return notesMatch && allSameOctaveShift;
 };
 
 /**

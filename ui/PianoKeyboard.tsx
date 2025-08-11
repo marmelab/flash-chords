@@ -256,10 +256,9 @@ const PianoKeyboard: PianoKeyboardComponent = ({
     screenWidth > screenHeight && // Is landscape
     screenWidth / screenHeight > 2.1; // iPhone X+ aspect ratio in landscape
 
-  // Add extra left margin for notch devices, minimal right margin
-  const leftMargin = isIPhoneWithNotch ? 80 : 30;
-  const rightMargin = 20;
-  const horizontalMargin = leftMargin + rightMargin;
+  // Use symmetrical margins to account for notch on either side
+  const sideMargin = isIPhoneWithNotch ? 80 : 30;
+  const horizontalMargin = sideMargin * 2; // Same margin on both sides
   const keyboardWidth = Math.min(screenWidth - horizontalMargin, 900); // Max 900px
   const whiteKeyWidth = keyboardWidth / 14; // 14 white keys total
   const blackKeyWidth = whiteKeyWidth * 0.6; // Black keys are 60% of white key width
@@ -387,7 +386,6 @@ const PianoKeyboard: PianoKeyboardComponent = ({
             styles.progressContainer,
             {
               width: keyboardWidth,
-              marginLeft: isIPhoneWithNotch ? 30 : 0,
             },
           ]}
         >
@@ -407,7 +405,6 @@ const PianoKeyboard: PianoKeyboardComponent = ({
           styles.keyboard,
           {
             width: keyboardWidth,
-            marginLeft: isIPhoneWithNotch ? 30 : 0,
           },
         ]}
       >
