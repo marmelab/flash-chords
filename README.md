@@ -1,6 +1,17 @@
-# Flash Cards App
+# Piano Chord Practice
 
-A simple React Native app built with Expo showing a "Hello World" welcome screen.
+An interactive React Native app for learning and practicing piano chords with real-time feedback and spaced repetition.
+
+## Features
+
+- **Interactive Piano Keyboard**: Full-featured piano with realistic sound synthesis
+- **Chord Recognition**: Practice major, minor, diminished, and dominant 7th chords
+- **Multiple Inversions**: Learn root position, first, and second inversions
+- **Smart Practice**: Spaced repetition algorithm focuses on chords you find difficult
+- **Visual Feedback**: Instant visual feedback showing correct, incorrect, and missed notes
+- **Customizable Sessions**: Choose specific keys, chord types, and inversions to practice
+- **Progress Tracking**: Track your accuracy and see completion percentage
+- **High-Quality Audio**: Multi-harmonic piano synthesis with ADSR envelope for realistic sound
 
 ## Prerequisites
 
@@ -10,7 +21,13 @@ A simple React Native app built with Expo showing a "Hello World" welcome screen
 
 ## Installation
 
-1. Install dependencies:
+1. Clone the repository:
+```bash
+git clone https://github.com/fzaninotto/chord-cards.git
+cd chord-cards
+```
+
+2. Install dependencies:
 ```bash
 npm install
 ```
@@ -34,3 +51,53 @@ Then choose how to run the app:
 - `npm run web` - Start directly in web mode
 - `npm run ios` - Start directly on iOS
 - `npm run android` - Start directly on Android
+- `npm test` - Run unit tests
+- `npm run test:coverage` - Run tests with coverage report
+- `npm run typecheck` - Run TypeScript type checking
+
+## How to Use
+
+1. **Select Practice Settings**: Choose which keys, chord qualities, and inversions you want to practice
+2. **Start Practice**: The app will display a chord name and inversion
+3. **Play the Chord**: Tap the piano keys to play the requested chord
+4. **Submit Answer**: Press the submit button to check your answer
+5. **Get Feedback**: 
+   - Green keys show correctly played notes
+   - Red keys show incorrect notes
+   - Yellow keys show notes you should have played
+6. **Continue Learning**: The app uses spaced repetition to show you chords you need more practice with
+
+## Architecture
+
+The app is built with:
+- **React Native & Expo**: Cross-platform mobile development
+- **TypeScript**: Type-safe code with better IDE support
+- **Jest**: Unit testing framework
+- **Web Audio API**: Real-time audio synthesis
+
+Key components:
+- `PianoKeyboard`: Main keyboard interface with touch handling
+- `ChordValidation`: Logic for checking chord answers with enharmonic equivalent support
+- `FlashcardLogic`: Spaced repetition algorithm for optimal learning
+- `PianoAudio`: Audio synthesis engine with pre-generation and caching
+
+## Testing
+
+Run the test suite:
+```bash
+npm test
+```
+
+Run tests with coverage:
+```bash
+npm run test:coverage
+```
+
+## CI/CD
+
+The project includes GitHub Actions workflow that automatically:
+- Runs TypeScript type checking
+- Executes all unit tests
+- Generates coverage reports
+- Tests against Node.js 18.x and 20.x
+

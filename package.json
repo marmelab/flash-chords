@@ -1,5 +1,9 @@
 {
-  "name": "flash-cards",
+  "name": "chord-cards",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/fzaninotto/chord-cards.git"
+  },
   "version": "1.0.0",
   "main": "index.ts",
   "scripts": {
