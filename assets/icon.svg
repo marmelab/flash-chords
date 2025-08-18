@@ -1,0 +1,47 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="1024" height="1024" fill="#2c3e50"/>
+  
+  <!-- Piano keyboard container -->
+  <g transform="translate(112, 312)">
+    <!-- White keys (7 keys total showing one octave) -->
+    <!-- C - highlighted -->
+    <rect x="0" y="0" width="110" height="400" fill="#27ae60" stroke="#1a1a1a" stroke-width="4" rx="8"/>
+    <!-- D -->
+    <rect x="114" y="0" width="110" height="400" fill="#ffffff" stroke="#1a1a1a" stroke-width="4" rx="8"/>
+    <!-- E - highlighted -->
+    <rect x="228" y="0" width="110" height="400" fill="#27ae60" stroke="#1a1a1a" stroke-width="4" rx="8"/>
+    <!-- F -->
+    <rect x="342" y="0" width="110" height="400" fill="#ffffff" stroke="#1a1a1a" stroke-width="4" rx="8"/>
+    <!-- G - highlighted -->
+    <rect x="456" y="0" width="110" height="400" fill="#27ae60" stroke="#1a1a1a" stroke-width="4" rx="8"/>
+    <!-- A -->
+    <rect x="570" y="0" width="110" height="400" fill="#ffffff" stroke="#1a1a1a" stroke-width="4" rx="8"/>
+    <!-- B -->
+    <rect x="684" y="0" width="110" height="400" fill="#ffffff" stroke="#1a1a1a" stroke-width="4" rx="8"/>
+    
+    <!-- Black keys -->
+    <!-- C# -->
+    <rect x="75" y="0" width="70" height="240" fill="#1a1a1a" stroke="#000000" stroke-width="2" rx="6"/>
+    <!-- D# -->
+    <rect x="189" y="0" width="70" height="240" fill="#1a1a1a" stroke="#000000" stroke-width="2" rx="6"/>
+    <!-- F# -->
+    <rect x="417" y="0" width="70" height="240" fill="#1a1a1a" stroke="#000000" stroke-width="2" rx="6"/>
+    <!-- G# -->
+    <rect x="531" y="0" width="70" height="240" fill="#1a1a1a" stroke="#000000" stroke-width="2" rx="6"/>
+    <!-- A# -->
+    <rect x="645" y="0" width="70" height="240" fill="#1a1a1a" stroke="#000000" stroke-width="2" rx="6"/>
+    
+    <!-- Add subtle highlights on pressed keys -->
+    <rect x="5" y="5" width="100" height="30" fill="#34c759" opacity="0.3" rx="4"/>
+    <rect x="233" y="5" width="100" height="30" fill="#34c759" opacity="0.3" rx="4"/>
+    <rect x="461" y="5" width="100" height="30" fill="#34c759" opacity="0.3" rx="4"/>
+  </g>
+  
+  <!-- Musical note decoration -->
+  <g transform="translate(462, 180)" opacity="0.8">
+    <ellipse cx="0" cy="0" rx="25" ry="18" fill="#ffffff" transform="rotate(-20)"/>
+    <rect x="20" y="-80" width="8" height="80" fill="#ffffff"/>
+    <path d="M 28 -80 Q 40 -70 45 -50" stroke="#ffffff" stroke-width="8" fill="none"/>
+  </g>
+</svg>

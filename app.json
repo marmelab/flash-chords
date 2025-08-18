@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "flash-cards",
-    "slug": "flash-cards",
+    "name": "flash-chords",
+    "slug": "flash-chords",
     "version": "1.0.0",
     "orientation": "default",
     "icon": "./assets/icon.png",
@@ -14,7 +14,8 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.anonymous.flash-cards"
+      "bundleIdentifier": "com.anonymous.flash-chords",
+      "icon": "./assets/icon.png"
     },
     "android": {
       "adaptiveIcon": {
