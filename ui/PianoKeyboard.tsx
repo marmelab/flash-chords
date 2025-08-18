@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as ScreenOrientation from "expo-screen-orientation";
 import PianoKey from "./PianoKey";
 import ChordControls from "./ChordControls";
@@ -75,6 +76,7 @@ const PianoKeyboard: React.FC = () => {
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
   const [soundEnabled, setSoundEnabled] = useState<boolean>(true);
   const [showKeyNames, setShowKeyNames] = useState<boolean>(false);
+  const [preferencesLoaded, setPreferencesLoaded] = useState<boolean>(false);
   const [flashcardDeck, setFlashcardDeck] = useState<FlashcardDeck | null>(
     null
   );
@@ -83,10 +85,49 @@ const PianoKeyboard: React.FC = () => {
     Dimensions.get("window")
   );
 
-  // Initialize audio system if not already done
+  // Initialize audio system and load preferences
   useEffect(() => {
     initPianoAudio();
+    
+    // Load saved preferences
+    const loadPreferences = async () => {
+      try {
+        const [savedSound, savedShowNames] = await Promise.all([
+          AsyncStorage.getItem('soundEnabled'),
+          AsyncStorage.getItem('showKeyNames')
+        ]);
+        
+        if (savedSound !== null) {
+          setSoundEnabled(savedSound === 'true');
+        }
+        if (savedShowNames !== null) {
+          setShowKeyNames(savedShowNames === 'true');
+        }
+        setPreferencesLoaded(true);
+      } catch (error) {
+        console.error('Error loading preferences:', error);
+        setPreferencesLoaded(true);
+      }
+    };
+    
+    loadPreferences();
   }, []);
+  
+  // Save sound preference when it changes
+  useEffect(() => {
+    if (preferencesLoaded) {
+      AsyncStorage.setItem('soundEnabled', soundEnabled.toString())
+        .catch(error => console.error('Error saving sound preference:', error));
+    }
+  }, [soundEnabled, preferencesLoaded]);
+  
+  // Save show key names preference when it changes
+  useEffect(() => {
+    if (preferencesLoaded) {
+      AsyncStorage.setItem('showKeyNames', showKeyNames.toString())
+        .catch(error => console.error('Error saving show names preference:', error));
+    }
+  }, [showKeyNames, preferencesLoaded]);
 
   useEffect(() => {
     // Lock to landscape when component mounts
