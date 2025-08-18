@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, SafeAreaView } from 'react-native';
+import { StyleSheet, SafeAreaView, Platform } from 'react-native';
 import HomeScreen from './ui/HomeScreen';
 import PianoKeyboard from './ui/PianoKeyboard';
 import SummaryScreen from './ui/SummaryScreen';
@@ -41,7 +41,7 @@ export default function App(): React.ReactElement {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar style="light" backgroundColor="#2c3e50" />
+      <StatusBar style="light" backgroundColor={Platform.OS === 'ios' ? '#000000' : '#2c3e50'} />
       {currentScreen === 'home' && (
         <HomeScreen onStartExercise={handleStartExercise} />
       )}
@@ -66,6 +66,6 @@ export default function App(): React.ReactElement {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#2c3e50',
+    backgroundColor: Platform.OS === 'ios' ? '#000000' : '#2c3e50',
   },
 });
