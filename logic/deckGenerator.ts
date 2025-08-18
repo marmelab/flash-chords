@@ -18,17 +18,27 @@ const getChordQuality = (chordName: string): ChordQuality => {
     return 'diminished';
   }
   
-  // Dominant 7th chords (has '7' but not 'maj7' or 'm7')
-  if (chordName.match(/^[A-G]#?\d*7$/) || chordName.match(/^[A-G]#?7$/)) {
-    return 'dominant';
+  // Major 7th chords (contains 'maj7')
+  if (chordName.includes('maj7')) {
+    return 'major';
   }
   
-  // Minor chords (has 'm' but not diminished)
-  if (chordName.includes('m')) {
+  // Minor 7th chords (m7 but not m7b5 which is diminished)
+  if (chordName.includes('m7') && !chordName.includes('b5')) {
     return 'minor';
   }
   
-  // Major chords (including maj7)
+  // Minor triads (has 'm' but not followed by 'aj' as in maj7)
+  if (chordName.includes('m') && !chordName.includes('maj')) {
+    return 'minor';
+  }
+  
+  // Dominant 7th chords (has '7' but not 'maj7' or 'm7')
+  if (chordName.includes('7') && !chordName.includes('maj') && !chordName.includes('m')) {
+    return 'dominant';
+  }
+  
+  // Major triads (default - no modifiers)
   return 'major';
 };
 
