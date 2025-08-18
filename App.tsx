@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, SafeAreaView, Platform } from 'react-native';
+import { StyleSheet, Platform, View } from 'react-native';
+import { SafeAreaProvider, initialWindowMetrics } from 'react-native-safe-area-context';
 import HomeScreen from './ui/homescreen/HomeScreen';
 import PianoKeyboard from './ui/PianoKeyboard';
 import SummaryScreen from './ui/SummaryScreen';
@@ -40,26 +41,28 @@ export default function App(): React.ReactElement {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar style="light" backgroundColor={Platform.OS === 'ios' ? '#000000' : '#2c3e50'} />
-      {currentScreen === 'home' && (
-        <HomeScreen onStartExercise={handleStartExercise} />
-      )}
-      {currentScreen === 'practice' && (
-        <PianoKeyboard 
-          settings={exerciseSettings!} 
-          chordDeck={chordDeck!}
-          onGoBack={handleGoBack}
-          onExerciseComplete={handleExerciseComplete}
-        />
-      )}
-      {currentScreen === 'summary' && (
-        <SummaryScreen 
-          deckStats={deckStats!}
-          onGoHome={handleGoBack}
-        />
-      )}
-    </SafeAreaView>
+    <SafeAreaProvider initialMetrics={initialWindowMetrics}>
+      <View style={styles.container}>
+        <StatusBar style="light" />
+        {currentScreen === 'home' && (
+          <HomeScreen onStartExercise={handleStartExercise} />
+        )}
+        {currentScreen === 'practice' && (
+          <PianoKeyboard 
+            settings={exerciseSettings!} 
+            chordDeck={chordDeck!}
+            onGoBack={handleGoBack}
+            onExerciseComplete={handleExerciseComplete}
+          />
+        )}
+        {currentScreen === 'summary' && (
+          <SummaryScreen 
+            deckStats={deckStats!}
+            onGoHome={handleGoBack}
+          />
+        )}
+      </View>
+    </SafeAreaProvider>
   );
 }
 

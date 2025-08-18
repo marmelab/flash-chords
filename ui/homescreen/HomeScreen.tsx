@@ -9,6 +9,7 @@ import {
   UIManager,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import * as ScreenOrientation from 'expo-screen-orientation';
 import { initPianoAudio } from '../../logic/pianoAudio';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { generateChordDeck } from '../../logic/deckGenerator';
@@ -104,8 +105,14 @@ const HomeScreen: HomeScreenComponent = ({ onStartExercise }) => {
     }
   }, [selectedKeys, selectedQualities, selectedExtensions, selectedInversions]);
 
-  // Pre-initialize piano audio and load saved settings
+  // Pre-initialize piano audio, lock orientation, and load saved settings
   useEffect(() => {
+    // Lock to portrait mode on mount
+    if (Platform.OS !== 'web') {
+      ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP)
+        .catch(error => console.log('Could not lock orientation:', error));
+    }
+    
     initPianoAudio();
     
     // Load saved exercise settings
@@ -173,6 +180,11 @@ const HomeScreen: HomeScreenComponent = ({ onStartExercise }) => {
     };
     
     loadSettings();
+    
+    // Cleanup: ensure portrait is maintained (no unlock needed since other screens handle their own orientation)
+    return () => {
+      // No cleanup needed - each screen manages its own orientation
+    };
   }, []);
 
   const handleStart = (): void => {
