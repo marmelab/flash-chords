@@ -41,6 +41,7 @@ export default function App(): React.ReactElement {
 
   return (
     <SafeAreaView style={styles.container}>
+      <StatusBar style="light" backgroundColor="#2c3e50" />
       {currentScreen === 'home' && (
         <HomeScreen onStartExercise={handleStartExercise} />
       )}
@@ -58,7 +59,6 @@ export default function App(): React.ReactElement {
           onGoHome={handleGoBack}
         />
       )}
-      <StatusBar style="light" />
     </SafeAreaView>
   );
 }

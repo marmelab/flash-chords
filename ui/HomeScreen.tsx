@@ -154,7 +154,10 @@ const HomeScreen: HomeScreenComponent = ({ onStartExercise }) => {
 
   return (
     <View style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <ScrollView 
+        contentContainerStyle={styles.scrollContent}
+        contentInsetAdjustmentBehavior="automatic"
+        showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
           <Text style={styles.title}>Piano Chord Practice</Text>
         </View>
@@ -362,7 +365,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: 20,
-    paddingTop: 10,
+    paddingTop: 20,
     paddingBottom: 40,
   },
   header: {
