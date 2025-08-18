@@ -7,6 +7,7 @@ import {
   ScrollView,
 } from 'react-native';
 import { initPianoAudio } from '../logic/pianoAudio';
+import { saveExerciseSettings, loadExerciseSettings } from '../logic/storage';
 import type { 
   HomeScreenComponent, 
   KeyOption, 
@@ -53,9 +54,45 @@ const HomeScreen: HomeScreenComponent = ({ onStartExercise }) => {
   const [selectedInversions, setSelectedInversions] = useState<string[]>(['root']); // Multiple selection, default to root
   const [keyTab, setKeyTab] = useState<'major' | 'minor'>('major'); // Tab state for keys
 
-  // Pre-initialize piano audio when the home screen loads
+  // Pre-initialize piano audio and load saved settings when the home screen loads
   useEffect(() => {
     initPianoAudio();
+    
+    // Load saved exercise settings
+    const loadSettings = async () => {
+      const savedSettings = await loadExerciseSettings();
+      if (savedSettings) {
+        setSelectedKeys(savedSettings.selectedKeys);
+        setSelectedQualities(savedSettings.selectedQualities as ChordQuality[]);
+        
+        // Convert inversions array to extensions and inversions
+        const hasTriads = savedSettings.selectedInversions.some(inv => 
+          ['root', 'first', 'second'].includes(inv)
+        );
+        const hasSevenths = savedSettings.selectedInversions.some(inv => 
+          ['root-7th', 'first-7th', 'second-7th', 'third-7th'].includes(inv)
+        );
+        
+        const extensions: ExtensionType[] = [];
+        if (hasTriads) extensions.push('triads');
+        if (hasSevenths) extensions.push('sevenths');
+        setSelectedExtensions(extensions.length > 0 ? extensions : ['triads']);
+        
+        // Extract basic inversions
+        const inversions = savedSettings.selectedInversions
+          .map(inv => inv.replace('-7th', ''))
+          .filter((v, i, a) => a.indexOf(v) === i); // Remove duplicates
+        setSelectedInversions(inversions.length > 0 ? inversions : ['root']);
+        
+        // Set key tab based on first selected key
+        if (savedSettings.selectedKeys.length > 0) {
+          const firstKey = savedSettings.selectedKeys[0];
+          setKeyTab(firstKey.includes('m') ? 'minor' : 'major');
+        }
+      }
+    };
+    
+    loadSettings();
   }, []);
 
   const handleStart = (): void => {
@@ -87,7 +124,31 @@ const HomeScreen: HomeScreenComponent = ({ onStartExercise }) => {
         second: selectedInversions.includes('second'),
       },
     };
-
+    
+    // Save settings for next time
+    const saveSettings = async () => {
+      // Convert to storage format
+      const storageInversions: string[] = [];
+      if (selectedExtensions.includes('triads')) {
+        if (selectedInversions.includes('root')) storageInversions.push('root');
+        if (selectedInversions.includes('first')) storageInversions.push('first');
+        if (selectedInversions.includes('second')) storageInversions.push('second');
+      }
+      if (selectedExtensions.includes('sevenths')) {
+        if (selectedInversions.includes('root')) storageInversions.push('root-7th');
+        if (selectedInversions.includes('first')) storageInversions.push('first-7th');
+        if (selectedInversions.includes('second')) storageInversions.push('second-7th');
+        if (selectedInversions.includes('third')) storageInversions.push('third-7th');
+      }
+      
+      await saveExerciseSettings({
+        selectedKeys,
+        selectedQualities: selectedQualities as string[],
+        selectedInversions: storageInversions,
+      });
+    };
+    
+    saveSettings();
     onStartExercise(settings);
   };
 
