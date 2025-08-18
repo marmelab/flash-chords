@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Platform } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import type { DeckStats } from '../logic/flashcardLogic';
 
@@ -26,7 +27,7 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({ deckStats, onGoHome }) =>
     };
   }, []);
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <TouchableOpacity 
         style={styles.backButton}
         onPress={() => {
@@ -100,7 +101,7 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({ deckStats, onGoHome }) =>
         </View>
       </View>
     </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 };
 

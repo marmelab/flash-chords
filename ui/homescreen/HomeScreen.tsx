@@ -8,6 +8,7 @@ import {
   Platform,
   UIManager,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { initPianoAudio } from '../../logic/pianoAudio';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { generateChordDeck } from '../../logic/deckGenerator';
@@ -59,6 +60,11 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
 }
 
 const HomeScreen: HomeScreenComponent = ({ onStartExercise }) => {
+  const insets = useSafeAreaInsets();
+  // Use fallback values if insets aren't ready yet
+  const topInset = insets.top || (Platform.OS === 'ios' ? 44 : 0);
+  const bottomInset = insets.bottom || (Platform.OS === 'ios' ? 34 : 0);
+  
   const [selectedKeys, setSelectedKeys] = useState<string[]>(['C']);
   const [selectedQualities, setSelectedQualities] = useState<ChordQuality[]>(['major', 'minor', 'diminished', 'dominant']);
   const [selectedExtensions, setSelectedExtensions] = useState<ExtensionType[]>(['triads']);
@@ -229,7 +235,7 @@ const HomeScreen: HomeScreenComponent = ({ onStartExercise }) => {
 
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { paddingTop: topInset }]}>
       <View style={styles.header}>
         <Text style={styles.title}>Piano Chord Practice</Text>
       </View>
@@ -288,7 +294,7 @@ const HomeScreen: HomeScreenComponent = ({ onStartExercise }) => {
       </ScrollView>
 
       {/* Fixed bottom button */}
-      <View style={styles.bottomContainer}>
+      <View style={[styles.bottomContainer, { paddingBottom: bottomInset + 20 }]}>
         <View style={styles.deckInfo}>
           <Text style={styles.deckInfoText}>
             {deckSize} {deckSize === 1 ? 'card' : 'cards'} in deck
@@ -312,7 +318,7 @@ const styles = StyleSheet.create({
   },
   header: {
     paddingHorizontal: 20,
-    paddingTop: 20,
+    paddingTop: 10,
     paddingBottom: 15,
     backgroundColor: Platform.OS === 'ios' ? '#000000' : '#2c3e50',
   },
@@ -336,7 +342,6 @@ const styles = StyleSheet.create({
     backgroundColor: Platform.OS === 'ios' ? 'rgba(0, 0, 0, 0.95)' : '#2c3e50',
     paddingHorizontal: 20,
     paddingTop: 12,
-    paddingBottom: Platform.OS === 'ios' ? 30 : 20,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: -2 },
     shadowOpacity: 0.1,

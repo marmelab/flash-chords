@@ -7,6 +7,7 @@ import {
   Platform,
   Dimensions,
 } from "react-native";
+import { SafeAreaView } from 'react-native-safe-area-context';
 import * as ScreenOrientation from "expo-screen-orientation";
 import PianoKey from "./PianoKey";
 import ChordControls from "./ChordControls";
@@ -342,7 +343,7 @@ const PianoKeyboard: PianoKeyboardComponent = ({
   };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <TouchableOpacity
         style={styles.backButton}
         onPress={() => {
@@ -420,7 +421,7 @@ const PianoKeyboard: PianoKeyboardComponent = ({
         onSubmit={handleCheckAnswer}
         onNewChord={() => handleGenerateNewChord(true)}
       />
-    </View>
+    </SafeAreaView>
   );
 };
 
