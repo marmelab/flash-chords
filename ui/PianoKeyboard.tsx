@@ -468,7 +468,7 @@ const PianoKeyboard: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#2c3e50",
+    backgroundColor: '#2c3e50',
     justifyContent: "center",
     alignItems: "center",
   },
@@ -519,31 +519,27 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   chordCard: {
-    backgroundColor: "rgba(255, 255, 255, 0.1)",
-    borderRadius: 12,
-    paddingHorizontal: 20,
-    paddingVertical: 12,
+    backgroundColor: "rgba(255, 255, 255, 0.05)",
+    paddingHorizontal: 30,
+    paddingVertical: 16,
     marginBottom: 10,
-    marginTop: 20, // Reduced to move everything up
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.2)",
-    minHeight: 50, // Prevent layout shift
+    marginTop: 20,
+    minHeight: 50,
     alignItems: "center",
     justifyContent: "center",
   },
   correctCard: {
-    backgroundColor: "rgba(39, 174, 96, 0.2)",
-    borderColor: "#27ae60",
+    backgroundColor: "rgba(39, 174, 96, 0.3)",
   },
   incorrectCard: {
-    backgroundColor: "rgba(231, 76, 60, 0.2)",
-    borderColor: "#e74c3c",
+    backgroundColor: "rgba(231, 76, 60, 0.3)",
   },
   chordText: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "#FFFFFF",
+    fontSize: 32,
+    fontWeight: "400",
+    color: "rgba(255, 255, 255, 0.9)",
     textAlign: "center",
+    letterSpacing: 1.5,
   },
   keyboard: {
     height: 200,

@@ -1,6 +1,6 @@
 import React from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { Platform, LogBox } from 'react-native';
+import { LogBox } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { SafeAreaProvider, initialWindowMetrics } from 'react-native-safe-area-context';
@@ -25,7 +25,7 @@ export default function App(): React.ReactElement {
           screenOptions={{
             headerShown: false,
             cardStyle: { 
-              backgroundColor: Platform.OS === 'ios' ? '#000000' : '#2c3e50' 
+              backgroundColor: '#2c3e50' 
             },
             gestureEnabled: false,
             presentation: 'card',

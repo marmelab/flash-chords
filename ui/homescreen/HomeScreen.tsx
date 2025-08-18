@@ -330,13 +330,13 @@ const HomeScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Platform.OS === 'ios' ? '#000000' : '#2c3e50',
+    backgroundColor: '#2c3e50',
   },
   header: {
     paddingHorizontal: 20,
     paddingTop: 10,
     paddingBottom: 15,
-    backgroundColor: Platform.OS === 'ios' ? '#000000' : '#2c3e50',
+    backgroundColor: '#2c3e50',
   },
   title: {
     fontSize: 28,
@@ -355,7 +355,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: Platform.OS === 'ios' ? 'rgba(0, 0, 0, 0.95)' : '#2c3e50',
+    backgroundColor: '#2c3e50',
     paddingHorizontal: 20,
     paddingTop: 12,
     shadowColor: '#000',

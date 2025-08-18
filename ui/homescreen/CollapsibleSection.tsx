@@ -81,7 +81,7 @@ export const CollapsibleSection: React.FC<CollapsibleSectionProps> = ({
       <Animated.View 
         style={[
           {
-            backgroundColor: Platform.OS === 'ios' ? '#1c1c1e' : '#34495e',
+            backgroundColor: '#34495e',
             maxHeight: heightAnimation.interpolate({
               inputRange: [0, 1],
               outputRange: [0, 600], // Adjust based on content
@@ -101,10 +101,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: Platform.OS === 'ios' ? '#1c1c1e' : '#34495e',
+    backgroundColor: '#34495e',
     paddingHorizontal: 20,
     paddingVertical: 16,
-    marginTop: 1,
+    marginTop: 3,
   },
   sectionHeaderContent: {
     flex: 1,
@@ -121,7 +121,7 @@ const styles = StyleSheet.create({
   },
   chevron: {
     fontSize: 28,
-    color: Platform.OS === 'ios' ? '#8e8e93' : '#95a5a6',
+    color: '#95a5a6',
     marginLeft: 10,
   },
 });
