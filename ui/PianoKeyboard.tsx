@@ -8,6 +8,7 @@ import {
   Dimensions,
 } from "react-native";
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import * as ScreenOrientation from "expo-screen-orientation";
 import PianoKey from "./PianoKey";
 import ChordControls from "./ChordControls";
@@ -28,8 +29,8 @@ import {
   type FlashcardDeck,
   type DeckStats,
 } from "../logic/flashcardLogic";
+import type { PracticeScreenNavigationProp, PracticeScreenRouteProp } from '../navigation/types';
 import type {
-  PianoKeyboardComponent,
   Chord,
   InversionType,
   Note,
@@ -50,28 +51,22 @@ const lockToLandscape = (): void => {
     });
 };
 
-const unlockOrientation = (): void => {
+const unlockOrientation = async (): Promise<void> => {
   if (Platform.OS === "web") return;
 
-  // First set to portrait, then unlock to allow both orientations
-  ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP)
-    .then(() => {
-      // After setting to portrait, unlock to allow rotation
-      return ScreenOrientation.unlockAsync();
-    })
-    .then(() => {
-      console.log("Reset to portrait and unlocked");
-    })
-    .catch((error) => {
-      console.log("Could not reset orientation:", error);
-    });
+  try {
+    // Set to portrait first
+    await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
+    console.log("Reset to portrait");
+  } catch (error) {
+    console.log("Could not reset orientation:", error);
+  }
 };
 
-const PianoKeyboard: PianoKeyboardComponent = ({
-  chordDeck,
-  onGoBack,
-  onExerciseComplete,
-}) => {
+const PianoKeyboard: React.FC = () => {
+  const navigation = useNavigation<PracticeScreenNavigationProp>();
+  const route = useRoute<PracticeScreenRouteProp>();
+  const { settings, chordDeck } = route.params;
   const [selectedKeys, setSelectedKeys] = useState<Set<string>>(new Set());
   const [currentChord, setCurrentChord] = useState<Chord | null>(null);
   const [currentInversion, setCurrentInversion] =
@@ -226,7 +221,7 @@ const PianoKeyboard: PianoKeyboardComponent = ({
     // Check if exercise is complete
     if (newStats.isComplete) {
       setTimeout(() => {
-        onExerciseComplete(newStats);
+        navigation.navigate('Summary', { deckStats: newStats });
       }, 1500);
     } else {
       // Move to next chord after delay for both correct and incorrect answers
@@ -346,9 +341,13 @@ const PianoKeyboard: PianoKeyboardComponent = ({
     <SafeAreaView style={styles.container}>
       <TouchableOpacity
         style={styles.backButton}
-        onPress={() => {
-          unlockOrientation();
-          onGoBack();
+        onPress={async () => {
+          // Reset orientation before navigating
+          await unlockOrientation();
+          // Small delay to ensure orientation change completes
+          setTimeout(() => {
+            navigation.goBack();
+          }, 100);
         }}
       >
         <Text style={styles.backButtonText}>‹</Text>

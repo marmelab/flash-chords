@@ -9,6 +9,7 @@ import {
   UIManager,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useNavigation } from '@react-navigation/native';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import { initPianoAudio } from '../../logic/pianoAudio';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -17,8 +18,8 @@ import { CollapsibleSection } from './CollapsibleSection';
 import { KeysSection, getKeysSummary } from './KeysSection';
 import { ChordTypesSection, getChordTypesSummary } from './ChordTypesSection';
 import { InversionsSection, getInversionsSummary } from './InversionsSection';
+import type { HomeScreenNavigationProp } from '../../navigation/types';
 import type { 
-  HomeScreenComponent, 
   KeyOption, 
   ChordQuality, 
   ExtensionType,
@@ -60,9 +61,9 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
-const HomeScreen: HomeScreenComponent = ({ onStartExercise }) => {
+const HomeScreen: React.FC = () => {
+  const navigation = useNavigation<HomeScreenNavigationProp>();
   const insets = useSafeAreaInsets();
-  // Use fallback values if insets aren't ready yet
   const topInset = insets.top || (Platform.OS === 'ios' ? 44 : 0);
   const bottomInset = insets.bottom || (Platform.OS === 'ios' ? 34 : 0);
   
@@ -217,8 +218,11 @@ const HomeScreen: HomeScreenComponent = ({ onStartExercise }) => {
       },
     };
     
-    // Settings are already auto-saved on change, no need to save here
-    onStartExercise(settings);
+    // Generate the chord deck based on settings
+    const deck = generateChordDeck(settings);
+    
+    // Navigate to Practice screen with settings and deck
+    navigation.navigate('Practice', { settings, chordDeck: deck });
   };
 
   // Calculate the number of cards in the deck based on current settings

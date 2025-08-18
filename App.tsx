@@ -1,77 +1,46 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Platform, View, LogBox } from 'react-native';
+import { Platform, LogBox } from 'react-native';
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
 import { SafeAreaProvider, initialWindowMetrics } from 'react-native-safe-area-context';
+import 'react-native-gesture-handler';
 import HomeScreen from './ui/homescreen/HomeScreen';
 import PianoKeyboard from './ui/PianoKeyboard';
 import SummaryScreen from './ui/SummaryScreen';
-import { generateChordDeck } from './logic/deckGenerator';
-import type { DeckStats } from './logic/flashcardLogic';
-import type { 
-  ScreenType, 
-  ExerciseSettings, 
-  ChordDeckItem 
-} from './types';
+import type { RootStackParamList } from './navigation/types';
 
 // Suppress the expo-av deprecation warning since we're still using it until SDK 54
 LogBox.ignoreLogs(['[expo-av]: Expo AV has been deprecated']);
 
+const Stack = createStackNavigator<RootStackParamList>();
+
 export default function App(): React.ReactElement {
-  const [currentScreen, setCurrentScreen] = useState<ScreenType>('home');
-  const [exerciseSettings, setExerciseSettings] = useState<ExerciseSettings | null>(null);
-  const [chordDeck, setChordDeck] = useState<ChordDeckItem[] | null>(null);
-  const [deckStats, setDeckStats] = useState<DeckStats | null>(null);
-
-  const handleStartExercise = (settings: ExerciseSettings): void => {
-    // Generate the chord deck based on settings
-    const deck = generateChordDeck(settings);
-    
-    setExerciseSettings(settings);
-    setChordDeck(deck);
-    setCurrentScreen('practice');
-  };
-
-  const handleGoBack = (): void => {
-    setCurrentScreen('home');
-    setExerciseSettings(null);
-    setChordDeck(null);
-    setDeckStats(null);
-  };
-
-  const handleExerciseComplete = (stats: DeckStats): void => {
-    setDeckStats(stats);
-    setCurrentScreen('summary');
-  };
-
   return (
     <SafeAreaProvider initialMetrics={initialWindowMetrics}>
-      <View style={styles.container}>
+      <NavigationContainer>
         <StatusBar style="light" />
-        {currentScreen === 'home' && (
-          <HomeScreen onStartExercise={handleStartExercise} />
-        )}
-        {currentScreen === 'practice' && (
-          <PianoKeyboard 
-            settings={exerciseSettings!} 
-            chordDeck={chordDeck!}
-            onGoBack={handleGoBack}
-            onExerciseComplete={handleExerciseComplete}
-          />
-        )}
-        {currentScreen === 'summary' && (
-          <SummaryScreen 
-            deckStats={deckStats!}
-            onGoHome={handleGoBack}
-          />
-        )}
-      </View>
+        <Stack.Navigator
+          initialRouteName="Home"
+          screenOptions={{
+            headerShown: false,
+            cardStyle: { 
+              backgroundColor: Platform.OS === 'ios' ? '#000000' : '#2c3e50' 
+            },
+            gestureEnabled: false,
+            presentation: 'card',
+            cardStyleInterpolator: ({ current }) => ({
+              cardStyle: {
+                opacity: current.progress,
+              },
+            }), // Simple fade transition instead of slide
+          }}
+        >
+          <Stack.Screen name="Home" component={HomeScreen} />
+          <Stack.Screen name="Practice" component={PianoKeyboard} />
+          <Stack.Screen name="Summary" component={SummaryScreen} />
+        </Stack.Navigator>
+      </NavigationContainer>
     </SafeAreaProvider>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Platform.OS === 'ios' ? '#000000' : '#2c3e50',
-  },
-});

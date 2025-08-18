@@ -1,43 +1,64 @@
-import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Platform } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Platform, Dimensions } from 'react-native';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import * as ScreenOrientation from 'expo-screen-orientation';
-import type { DeckStats } from '../logic/flashcardLogic';
+import type { SummaryScreenNavigationProp, SummaryScreenRouteProp } from '../navigation/types';
 
-interface SummaryScreenProps {
-  deckStats: DeckStats;
-  onGoHome: () => void;
-}
+const SummaryScreen: React.FC = () => {
+  const navigation = useNavigation<SummaryScreenNavigationProp>();
+  const route = useRoute<SummaryScreenRouteProp>();
+  const { deckStats } = route.params;
+  const insets = useSafeAreaInsets();
+  const [isPortrait, setIsPortrait] = useState(
+    Dimensions.get('window').height > Dimensions.get('window').width
+  );
 
-const SummaryScreen: React.FC<SummaryScreenProps> = ({ deckStats, onGoHome }) => {
   useEffect(() => {
-    // Lock to landscape on mount
+    // Allow both portrait and landscape - unlock orientation
     if (Platform.OS !== 'web') {
-      ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE)
-        .catch(error => console.log('Could not lock orientation:', error));
+      ScreenOrientation.unlockAsync()
+        .catch(error => console.log('Could not unlock orientation:', error));
     }
+
+    // Listen for orientation changes
+    const updateOrientation = () => {
+      const { width, height } = Dimensions.get('window');
+      setIsPortrait(height > width);
+    };
+
+    const subscription = Dimensions.addEventListener('change', updateOrientation);
     
-    // Cleanup: unlock orientation when going home
+    // Cleanup: lock back to portrait when going home
     return () => {
+      subscription?.remove();
       if (Platform.OS !== 'web') {
         ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP)
-          .then(() => ScreenOrientation.unlockAsync())
           .catch(error => console.log('Could not reset orientation:', error));
       }
     };
   }, []);
+  // Calculate proper top position for back button
+  const backButtonTop = Platform.OS === 'ios' ? Math.max(insets.top, isPortrait ? 44 : 20) : 10;
+
   return (
     <SafeAreaView style={styles.container}>
       <TouchableOpacity 
-        style={styles.backButton}
-        onPress={() => {
+        style={[styles.backButton, { top: backButtonTop }]}
+        onPress={async () => {
+          // Lock to portrait before navigating to Home
           if (Platform.OS !== 'web') {
-            ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP)
-              .then(() => ScreenOrientation.unlockAsync())
-              .then(() => onGoHome())
-              .catch(() => onGoHome());
+            try {
+              await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
+              // Small delay to ensure orientation change completes
+              setTimeout(() => {
+                navigation.navigate('Home');
+              }, 100);
+            } catch (error) {
+              navigation.navigate('Home');
+            }
           } else {
-            onGoHome();
+            navigation.navigate('Home');
           }
         }}
       >
@@ -60,15 +81,15 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({ deckStats, onGoHome }) =>
           </View>
           <View style={styles.statBox}>
             <Text style={styles.statNumber}>
-              {deckStats.cardsByDifficulty.reduce((sum, card) => sum + card.attempts, 0)}
+              {deckStats.cardsByDifficulty.reduce((sum: number, card) => sum + card.attempts, 0)}
             </Text>
             <Text style={styles.statLabel}>Total Attempts</Text>
           </View>
           <View style={styles.statBox}>
             <Text style={styles.statNumber}>
               {Math.round(
-                (deckStats.cardsByDifficulty.reduce((sum, card) => sum + card.correctAttempts, 0) /
-                deckStats.cardsByDifficulty.reduce((sum, card) => sum + card.attempts, 0)) * 100
+                (deckStats.cardsByDifficulty.reduce((sum: number, card) => sum + card.correctAttempts, 0) /
+                deckStats.cardsByDifficulty.reduce((sum: number, card) => sum + card.attempts, 0)) * 100
               )}%
             </Text>
             <Text style={styles.statLabel}>Accuracy</Text>
@@ -77,7 +98,7 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({ deckStats, onGoHome }) =>
         
         <View style={styles.listContainer}>
           <Text style={styles.listTitle}>Chords by Difficulty</Text>
-          {deckStats.cardsByDifficulty.map((card, index) => (
+          {deckStats.cardsByDifficulty.map((card: any, index: number) => (
             <View key={index} style={styles.listItem}>
               <View style={styles.listItemLeft}>
                 <Text style={styles.listItemRank}>#{index + 1}</Text>
@@ -112,7 +133,6 @@ const styles = StyleSheet.create({
   },
   backButton: {
     position: 'absolute',
-    top: 10,
     left: 20,
     backgroundColor: 'transparent',
     width: 40,
