@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, SafeAreaView, Platform } from 'react-native';
-import HomeScreen from './ui/HomeScreen';
+import HomeScreen from './ui/homescreen/HomeScreen';
 import PianoKeyboard from './ui/PianoKeyboard';
 import SummaryScreen from './ui/SummaryScreen';
 import { generateChordDeck } from './logic/deckGenerator';
