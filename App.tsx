@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Platform, View } from 'react-native';
+import { StyleSheet, Platform, View, LogBox } from 'react-native';
 import { SafeAreaProvider, initialWindowMetrics } from 'react-native-safe-area-context';
 import HomeScreen from './ui/homescreen/HomeScreen';
 import PianoKeyboard from './ui/PianoKeyboard';
@@ -12,6 +12,9 @@ import type {
   ExerciseSettings, 
   ChordDeckItem 
 } from './types';
+
+// Suppress the expo-av deprecation warning since we're still using it until SDK 54
+LogBox.ignoreLogs(['[expo-av]: Expo AV has been deprecated']);
 
 export default function App(): React.ReactElement {
   const [currentScreen, setCurrentScreen] = useState<ScreenType>('home');
