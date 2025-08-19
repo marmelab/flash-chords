@@ -316,12 +316,20 @@ const HomeScreen: React.FC = () => {
             {deckSize} {deckSize === 1 ? 'card' : 'cards'} in deck
           </Text>
         </View>
-        <TouchableOpacity 
-          style={styles.startButton} 
-          onPress={handleStart}
-          activeOpacity={0.8}>
-          <Text style={styles.startButtonText}>Start Practice</Text>
-        </TouchableOpacity>
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity 
+            style={styles.startButton} 
+            onPress={handleStart}
+            activeOpacity={0.8}>
+            <Text style={styles.startButtonText}>Start Practice</Text>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={styles.recognitionButton} 
+            onPress={() => navigation.navigate('ChordRecognition' as any)}
+            activeOpacity={0.8}>
+            <Text style={styles.recognitionButtonText}>🎵 Test Recognition</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </View>
   );
@@ -373,6 +381,9 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '500',
   },
+  buttonContainer: {
+    gap: 10,
+  },
   startButton: {
     backgroundColor: Platform.OS === 'ios' ? '#34c759' : '#27ae60',
     paddingVertical: 16,
@@ -388,6 +399,19 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 18,
     fontWeight: 'bold',
+  },
+  recognitionButton: {
+    backgroundColor: 'transparent',
+    paddingVertical: 14,
+    borderRadius: Platform.OS === 'ios' ? 14 : 12,
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#3498db',
+  },
+  recognitionButtonText: {
+    color: '#3498db',
+    fontSize: 16,
+    fontWeight: '600',
   },
   bottomSpacer: {
     height: 20,

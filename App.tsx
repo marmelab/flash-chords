@@ -8,6 +8,7 @@ import 'react-native-gesture-handler';
 import HomeScreen from './ui/homescreen/HomeScreen';
 import PianoKeyboard from './ui/PianoKeyboard';
 import SummaryScreen from './ui/SummaryScreen';
+import ChordRecognitionScreen from './ui/ChordRecognitionScreen';
 import type { RootStackParamList } from './navigation/types';
 
 // Suppress the expo-av deprecation warning since we're still using it until SDK 54
@@ -39,6 +40,7 @@ export default function App(): React.ReactElement {
           <Stack.Screen name="Home" component={HomeScreen} />
           <Stack.Screen name="Practice" component={PianoKeyboard} />
           <Stack.Screen name="Summary" component={SummaryScreen} />
+          <Stack.Screen name="ChordRecognition" component={ChordRecognitionScreen} />
         </Stack.Navigator>
       </NavigationContainer>
     </SafeAreaProvider>

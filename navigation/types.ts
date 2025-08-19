@@ -12,6 +12,7 @@ export type RootStackParamList = {
   Summary: {
     deckStats: DeckStats;
   };
+  ChordRecognition: undefined;
 };
 
 export type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Home'>;
