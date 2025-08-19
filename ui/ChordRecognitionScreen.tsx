@@ -18,7 +18,7 @@ import { AudioFileParser } from '../logic/chordRecognition/AudioFileParser';
 
 const ChordRecognitionScreen: React.FC = () => {
   const navigation = useNavigation();
-  const [isRecording, setIsRecording] = useState(false);
+  const [isListening, setIsListening] = useState(false);
   const [detectedChord, setDetectedChord] = useState<string>('No chord detected');
   const [recording, setRecording] = useState<Audio.Recording | null>(null);
   const [chordHistory, setChordHistory] = useState<string[]>([]);
@@ -26,6 +26,9 @@ const ChordRecognitionScreen: React.FC = () => {
   const [chordDetector] = useState(() => new ChordDetector());
   const [audioProcessor] = useState(() => new AudioProcessor(44100, 4096));
   const [isProcessing, setIsProcessing] = useState(false);
+  const [continuousMode, setContinuousMode] = useState(true);
+  const recordingTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isListeningRef = React.useRef(false);
   const [debugInfo, setDebugInfo] = useState<{
     chromagram: number[];
     topCandidates: { chord: string; score: number; confidence: number }[];
@@ -40,11 +43,23 @@ const ChordRecognitionScreen: React.FC = () => {
     requestAudioPermissions();
     
     return () => {
-      // Cleanup recording if active
-      if (recording) {
-        recording.stopAndUnloadAsync();
+      // Cleanup on unmount
+      stopListening();
+      if (recordingTimeoutRef.current) {
+        clearTimeout(recordingTimeoutRef.current);
       }
     };
+  }, []);
+  
+  useEffect(() => {
+    // Auto-start listening when screen loads if in continuous mode
+    if (continuousMode && !isListening) {
+      // Small delay to ensure permissions are granted
+      const timer = setTimeout(() => {
+        startListening();
+      }, 500);
+      return () => clearTimeout(timer);
+    }
   }, []);
 
   const requestAudioPermissions = async () => {
@@ -58,7 +73,61 @@ const ChordRecognitionScreen: React.FC = () => {
     }
   };
 
-  const startRecording = async () => {
+  const startListening = async () => {
+    console.log('Starting listening, continuousMode:', continuousMode);
+    setIsListening(true);
+    isListeningRef.current = true;
+    
+    if (!continuousMode) {
+      // In manual mode, just do a single recording
+      await startSingleRecording();
+      setIsListening(false);
+      isListeningRef.current = false;
+    } else {
+      // Start continuous recording
+      startContinuousRecording();
+    }
+  };
+  
+  const stopListening = async () => {
+    console.log('Stopping listening');
+    setIsListening(false);
+    isListeningRef.current = false;
+    
+    if (recordingTimeoutRef.current) {
+      clearTimeout(recordingTimeoutRef.current);
+      recordingTimeoutRef.current = null;
+    }
+    
+    if (recording) {
+      try {
+        await recording.stopAndUnloadAsync();
+        setRecording(null);
+      } catch (error) {
+        console.error('Error stopping recording:', error);
+      }
+    }
+  };
+  
+  const startContinuousRecording = async () => {
+    console.log('Starting continuous recording cycle');
+    
+    try {
+      // Start a short recording (2 seconds)
+      await startSingleRecording();
+      // The recording will auto-stop after 2 seconds and trigger the next cycle
+    } catch (error) {
+      console.error('Error in continuous recording:', error);
+      // Retry after a delay
+      recordingTimeoutRef.current = setTimeout(() => {
+        if (isListeningRef.current) {
+          startContinuousRecording();
+        }
+      }, 1000);
+    }
+  };
+  
+  const startSingleRecording = async () => {
     try {
       // Configure audio mode
       await Audio.setAudioModeAsync({
@@ -96,48 +165,88 @@ const ChordRecognitionScreen: React.FC = () => {
         },
       };
 
-      const { recording } = await Audio.Recording.createAsync(recordingOptions);
+      const { recording: newRecording } = await Audio.Recording.createAsync(recordingOptions);
 
-      setRecording(recording);
-      setIsRecording(true);
+      setRecording(newRecording);
+      
+      // In continuous mode, automatically stop after 2 seconds
+      if (continuousMode) {
+        setTimeout(async () => {
+          await stopAndProcessRecording(newRecording);
+        }, 2000);
+      }
     } catch (error) {
       console.error('Failed to start recording:', error);
-      Alert.alert('Recording Error', 'Failed to start recording');
+      if (!continuousMode) {
+        Alert.alert('Recording Error', 'Failed to start recording');
+      }
     }
   };
 
-  const stopRecording = async () => {
-    if (!recording) return;
+  const stopAndProcessRecording = async (recordingToStop?: Audio.Recording) => {
+    const rec = recordingToStop || recording;
+    if (!rec) return;
 
     try {
-      setIsProcessing(true);
-      await recording.stopAndUnloadAsync();
+      console.log('Stopping and processing recording');
+      
+      if (!continuousMode) {
+        setIsProcessing(true);
+      }
+      
+      await rec.stopAndUnloadAsync();
       
       // Get the recording URI and process it
-      const uri = recording.getURI();
+      const uri = rec.getURI();
       if (uri) {
+        console.log('Processing audio from:', uri);
         await processRecordedAudio(uri);
       }
       
-      setRecording(null);
-      setIsRecording(false);
-      setIsProcessing(false);
+      // Only clear recording if it's the same one (not replaced by continuous mode)
+      if (recording === rec) {
+        setRecording(null);
+      }
       
-      // Reset audio mode
-      await Audio.setAudioModeAsync({
-        allowsRecordingIOS: false,
-        playsInSilentModeIOS: true,
-      });
+      if (!continuousMode) {
+        setIsProcessing(false);
+        
+        // Reset audio mode
+        await Audio.setAudioModeAsync({
+          allowsRecordingIOS: false,
+          playsInSilentModeIOS: true,
+        });
+      } else if (isListeningRef.current) {
+        // In continuous mode, start the next recording cycle
+        console.log('Scheduling next recording in continuous mode');
+        recordingTimeoutRef.current = setTimeout(() => {
+          if (isListeningRef.current) {
+            console.log('Starting next recording cycle');
+            startContinuousRecording();
+          }
+        }, 500); // Small delay between recordings
+      }
     } catch (error) {
       console.error('Failed to stop recording:', error);
-      setIsProcessing(false);
+      if (!continuousMode) {
+        setIsProcessing(false);
+      } else if (isListeningRef.current) {
+        // Retry in continuous mode
+        recordingTimeoutRef.current = setTimeout(() => {
+          if (isListeningRef.current) {
+            startContinuousRecording();
+          }
+        }, 1000);
+      }
     }
   };
 
   const processRecordedAudio = async (uri: string) => {
+    console.log('processRecordedAudio called with uri:', uri);
     try {
       // For web platform, we can use Web Audio API
       if (Platform.OS === 'web' && typeof window !== 'undefined') {
+        console.log('Processing on web platform');
         // Fetch the audio file
         const response = await fetch(uri);
         const arrayBuffer = await response.arrayBuffer();
@@ -553,15 +662,39 @@ ${['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'].map((note, i
             )}
           </View>
 
-          <TouchableOpacity
-            style={[styles.recordButton, isRecording && styles.recordingButton]}
-            onPress={isRecording ? stopRecording : startRecording}
-            disabled={isProcessing}
-          >
-            <Text style={styles.recordButtonText}>
-              {isProcessing ? '⏳ Processing' : isRecording ? '⏹ Stop' : '🎤 Record'}
-            </Text>
-          </TouchableOpacity>
+          <View style={styles.controlsContainer}>
+            <TouchableOpacity
+              style={[styles.recordButton, isListening && styles.listeningButton]}
+              onPress={isListening ? stopListening : startListening}
+              disabled={isProcessing && !continuousMode}
+            >
+              <Text style={styles.recordButtonText}>
+                {continuousMode ? (
+                  isListening ? '⏸ Pause' : '▶️ Start Listening'
+                ) : (
+                  isProcessing ? '⏳ Processing' : '🎤 Record Once'
+                )}
+              </Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity
+              style={styles.modeToggle}
+              onPress={() => {
+                if (isListening) stopListening();
+                setContinuousMode(!continuousMode);
+              }}
+            >
+              <Text style={styles.modeToggleText}>
+                {continuousMode ? '🔄 Continuous' : '📍 Manual'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+          
+          {isListening && continuousMode && (
+            <View style={styles.listeningIndicator}>
+              <Text style={styles.listeningText}>🎵 Listening...</Text>
+            </View>
+          )}
 
           {debugInfo && (
             <View style={styles.comparisonCard}>
@@ -767,22 +900,49 @@ const styles = StyleSheet.create({
     color: 'rgba(255, 255, 255, 0.8)',
     width: 35,
   },
+  controlsContainer: {
+    marginBottom: 10,
+  },
   recordButton: {
     backgroundColor: 'rgba(52, 152, 219, 0.15)',
     paddingVertical: 12,
     borderRadius: 8,
     borderWidth: 2,
     borderColor: '#3498db',
-    marginBottom: 10,
+    marginBottom: 8,
     alignItems: 'center',
   },
-  recordingButton: {
-    backgroundColor: 'rgba(231, 76, 60, 0.15)',
-    borderColor: '#e74c3c',
+  listeningButton: {
+    backgroundColor: 'rgba(46, 204, 113, 0.15)',
+    borderColor: '#2ecc71',
   },
   recordButtonText: {
     color: 'white',
     fontSize: 14,
+    fontWeight: '600',
+  },
+  modeToggle: {
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    paddingVertical: 8,
+    borderRadius: 6,
+    alignItems: 'center',
+  },
+  modeToggleText: {
+    color: 'rgba(255, 255, 255, 0.7)',
+    fontSize: 12,
+    fontWeight: '500',
+  },
+  listeningIndicator: {
+    backgroundColor: 'rgba(46, 204, 113, 0.1)',
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 6,
+    marginBottom: 10,
+    alignItems: 'center',
+  },
+  listeningText: {
+    color: '#2ecc71',
+    fontSize: 12,
     fontWeight: '600',
   },
   comparisonCard: {
