@@ -37,14 +37,18 @@ export const isAudioReady = (): boolean => {
 export const initPianoAudio = async (): Promise<void> => {
   if (isInitialized) return;
 
-  await Audio.setAudioModeAsync({
-    allowsRecordingIOS: false,
-    playsInSilentModeIOS: true, // Always play sounds, even when muted
-    shouldDuckAndroid: true,
-    staysActiveInBackground: false,
-    interruptionModeIOS: 1, // Do not mix with other apps
-    interruptionModeAndroid: 1,
-  });
+  // Don't set audio mode here - let the recording system manage it
+  // This prevents conflicts with continuous recording
+  try {
+    // Only set minimal audio settings that don't interfere with recording
+    await Audio.setAudioModeAsync({
+      playsInSilentModeIOS: true, // Always play sounds, even when muted
+      shouldDuckAndroid: true,
+      staysActiveInBackground: false,
+    });
+  } catch (error) {
+    console.log('Error setting audio mode for piano:', error);
+  }
 
   isInitialized = true;
   
