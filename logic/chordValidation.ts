@@ -141,17 +141,13 @@ export const getKeyStyle: KeyStyleCalculator = (
     return 'default';
   }
   
-  // If the answer is incorrect
+  // If the answer is incorrect overall, we still want to show partial correctness
   if (isSelected && isExactNote) {
-    // This exact note is both selected AND in the expected chord position
-    return 'correct';  // Show as correct since it's in the right place
-  } else if (isSelected && isInChordPattern) {
-    // The note is part of the chord but not in the right position/octave
-    return 'incorrect';  
-  } else if (isSelected && !isInChordPattern) {
-    return 'incorrect';  // Selected but not part of the chord at all
+    return 'correct';  // This note is correct even though the overall answer is wrong
+  } else if (isSelected && !isExactNote) {
+    return 'incorrect';  // Selected but wrong note
   } else if (isExactNote && !isSelected) {
-    return 'missed';  // Show expected notes when the answer is wrong
+    return 'missed';  // Show expected notes that were not selected
   }
   
   return 'default';

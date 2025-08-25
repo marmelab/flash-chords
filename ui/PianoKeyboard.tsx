@@ -90,10 +90,7 @@ const extractChordType = (chordName: string): string => {
   const quality = match[2].toLowerCase();
   
   // Build normalized chord type
-  let result = root + quality;
-  
-  console.log(`Normalized "${chordName}" to "${result}"`);
-  return result;
+  return root + quality;
 };
 
 
@@ -211,49 +208,34 @@ const PianoKeyboard: React.FC = () => {
     if (audioMode) {
       // Start continuous recognition
       setIsListening(true);
-      continuousRecognition.start((chord, notes) => {
-        console.log('Continuous detection:', chord, notes);
+      continuousRecognition.start((chord, detectedNotes) => {
         setLastDetectedChord(chord);
         
-        // If we're waiting for a chord and one is detected
-        if (waitingForChord && chord && notes.length > 0 && !showResult && currentChord) {
-          console.log('=== Audio Detection ===');
-          console.log('Expected:', currentChord.name, '-', currentInversion);
-          console.log('Detected:', chord);
-          
+        // Only process detection if we're still in audio mode and waiting for a chord
+        if (audioMode && waitingForChord && chord && detectedNotes.length > 0 && !showResult && currentChord) {
           // Check if the detected chord type matches the expected chord
-          // Extract just the chord type without comparing inversions
           const detectedChordType = extractChordType(chord);
           const expectedChordType = extractChordType(currentChord.name);
           
-          console.log(`Comparing: "${detectedChordType}" vs "${expectedChordType}"`);
-          
           if (detectedChordType === expectedChordType) {
-            console.log('✓ Correct chord type detected!');
-            
             // In audio mode, we accept any inversion of the correct chord
-            // Use the expected notes for visual feedback (show what was expected)
+            // Use the expected notes for visual feedback
             const expectedNotes = currentChord.notes[currentInversion] || [];
-            
-            console.log('Setting keys to expected pattern:', expectedNotes);
             setSelectedKeys(new Set(expectedNotes));
             setWaitingForChord(false);
             
-            // Check answer after a short delay - force it to be correct
-            // since we detected the right chord type (any inversion is OK)
+            // Process as correct answer after a short delay
             setTimeout(() => {
-              handleCheckAnswer(true); // Pass true to force correct
+              handleAudioResult(true);
             }, 500);
           } else {
-            console.log(`✗ Wrong chord: detected "${detectedChordType}" but expected "${expectedChordType}"`);
-            
             // Show the wrong chord that was played
-            setSelectedKeys(new Set(notes));
+            setSelectedKeys(new Set(detectedNotes));
             setWaitingForChord(false);
             
-            // Check the answer to show incorrect feedback
+            // Process as incorrect answer after a short delay
             setTimeout(() => {
-              handleCheckAnswer(false); // Pass false for incorrect
+              handleAudioResult(false);
             }, 500);
           }
         }
@@ -337,16 +319,8 @@ const PianoKeyboard: React.FC = () => {
     setSelectedKeys(newSelectedKeys);
   };
 
-  const handleCheckAnswer = (forceCorrect: boolean = false): void => {
+  const handleAudioResult = (isAnswerCorrect: boolean): void => {
     if (!flashcardDeck || !flashcardDeck.currentCard) return;
-
-    // In audio mode with correct chord detection, we force it to be correct
-    // Otherwise, check normally
-    const isAnswerCorrect = forceCorrect || checkAnswer(
-      selectedKeys,
-      currentChord,
-      currentInversion
-    );
 
     setIsCorrect(isAnswerCorrect);
     setShowResult(true);
@@ -389,14 +363,28 @@ const PianoKeyboard: React.FC = () => {
         navigation.navigate('Summary', { deckStats: newStats });
       }, 1500);
     } else {
-      // Move to next chord after delay for both correct and incorrect answers
+      // Move to next chord after delay
       setTimeout(
         () => {
           handleGenerateNewChord(false);
         },
         isAnswerCorrect ? 1500 : 2500
-      ); // Slightly longer delay to hear the chord
+      );
     }
+  };
+
+  const handleCheckAnswer = (): void => {
+    if (!flashcardDeck || !flashcardDeck.currentCard) return;
+
+    // Check the answer normally
+    const isAnswerCorrect = checkAnswer(
+      selectedKeys,
+      currentChord,
+      currentInversion
+    );
+
+    // Use the common result handler
+    handleAudioResult(isAnswerCorrect);
   };
 
   const getKeyStyle = (note: string): KeyStyle => {
