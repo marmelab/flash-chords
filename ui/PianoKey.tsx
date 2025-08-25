@@ -1,6 +1,6 @@
 import React from 'react';
 import { TouchableOpacity, Text, StyleSheet } from 'react-native';
-import type { PianoKeyComponent } from '../../types';
+import type { PianoKeyComponent } from '../types';
 
 const PianoKey: PianoKeyComponent = ({ 
   note, 

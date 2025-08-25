@@ -6,7 +6,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { SafeAreaProvider, initialWindowMetrics } from 'react-native-safe-area-context';
 import 'react-native-gesture-handler';
 import HomeScreen from './ui/homescreen/HomeScreen';
-import PianoKeyboard from './ui/exercise/PianoKeyboard';
+import PianoKeyboard from './ui/PianoKeyboard';
 import SummaryScreen from './ui/SummaryScreen';
 import ChordRecognitionScreen from './ui/ChordRecognitionScreen';
 import type { RootStackParamList } from './navigation/types';
