@@ -7,6 +7,7 @@ import {
   StyleSheet,
   Platform,
   UIManager,
+  Dimensions,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
@@ -66,6 +67,11 @@ const HomeScreen: React.FC = () => {
   const insets = useSafeAreaInsets();
   const topInset = insets.top || (Platform.OS === 'ios' ? 44 : 0);
   const bottomInset = insets.bottom || (Platform.OS === 'ios' ? 34 : 0);
+  
+  // Get screen dimensions for responsive layout
+  const screenWidth = Dimensions.get('window').width;
+  const isLargeScreen = screenWidth > 768; // Tablet/Desktop breakpoint
+  const maxContentWidth = 600; // Maximum width for content on large screens
   
   const [selectedKeys, setSelectedKeys] = useState<string[]>(['C']);
   const [selectedQualities, setSelectedQualities] = useState<ChordQuality[]>(['major', 'minor', 'diminished', 'dominant']);
@@ -252,14 +258,23 @@ const HomeScreen: React.FC = () => {
 
   return (
     <View style={[styles.container, { paddingTop: topInset }]}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Piano Chord Practice</Text>
-      </View>
-      
-      <ScrollView 
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}>
+      <View style={[
+        styles.contentWrapper, 
+        isLargeScreen && { 
+          maxWidth: maxContentWidth, 
+          width: '100%', 
+          alignSelf: 'center',
+          paddingHorizontal: 20 
+        }
+      ]}>
+        <View style={styles.header}>
+          <Text style={styles.title}>Piano Chord Practice</Text>
+        </View>
+        
+        <ScrollView 
+          style={styles.scrollView}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}>
         
         {/* Keys Section */}
         <CollapsibleSection
@@ -310,18 +325,32 @@ const HomeScreen: React.FC = () => {
       </ScrollView>
 
       {/* Fixed bottom button */}
-      <View style={[styles.bottomContainer, { paddingBottom: bottomInset + 20 }]}>
+      <View style={[
+        styles.bottomContainer, 
+        { paddingBottom: bottomInset + 20 },
+        isLargeScreen && { 
+          maxWidth: maxContentWidth, 
+          width: maxContentWidth,
+          left: '50%', 
+          transform: [{ translateX: -maxContentWidth/2 }],
+          paddingHorizontal: 20
+        }
+      ]}>
         <View style={styles.deckInfo}>
           <Text style={styles.deckInfoText}>
             {deckSize} {deckSize === 1 ? 'card' : 'cards'} in deck
           </Text>
         </View>
         <TouchableOpacity 
-          style={styles.startButton} 
+          style={[
+            styles.startButton,
+            isLargeScreen && { width: '100%' }
+          ]} 
           onPress={handleStart}
           activeOpacity={0.8}>
           <Text style={styles.startButtonText}>Start Practice</Text>
         </TouchableOpacity>
+      </View>
       </View>
     </View>
   );
@@ -331,6 +360,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#2c3e50',
+  },
+  contentWrapper: {
+    flex: 1,
   },
   header: {
     paddingHorizontal: 20,

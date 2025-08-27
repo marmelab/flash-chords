@@ -3,6 +3,8 @@ import {
   TouchableOpacity,
   Text,
   StyleSheet,
+  Dimensions,
+  Platform,
 } from 'react-native';
 
 interface SelectionButtonProps {
@@ -18,11 +20,15 @@ export const SelectionButton: React.FC<SelectionButtonProps> = ({
   onPress,
   style = 'default',
 }) => {
+  const screenWidth = Dimensions.get('window').width;
+  const isLargeScreen = screenWidth > 768;
+  
   return (
     <TouchableOpacity
       style={[
         styles.button,
         style === 'compact' && styles.compactButton,
+        style === 'compact' && isLargeScreen && styles.compactButtonLarge,
         isSelected && styles.selectedButton
       ]}
       onPress={onPress}>
@@ -50,6 +56,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 8,
     borderRadius: 20,
+  },
+  compactButtonLarge: {
+    paddingHorizontal: 25,
+    minWidth: 140,
   },
   selectedButton: {
     backgroundColor: '#3498db',

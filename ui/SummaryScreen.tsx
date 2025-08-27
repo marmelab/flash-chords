@@ -13,6 +13,11 @@ const SummaryScreen: React.FC = () => {
   const [isPortrait, setIsPortrait] = useState(
     Dimensions.get('window').height > Dimensions.get('window').width
   );
+  
+  // Get screen dimensions for responsive layout
+  const screenWidth = Dimensions.get('window').width;
+  const isLargeScreen = screenWidth > 768;
+  const maxContentWidth = 600;
 
   useEffect(() => {
     // Allow both portrait and landscape - unlock orientation
@@ -66,11 +71,17 @@ const SummaryScreen: React.FC = () => {
       </TouchableOpacity>
       
       <ScrollView 
-        style={styles.scrollContainer}
+        style={[
+          styles.scrollContainer,
+          isLargeScreen && { maxWidth: maxContentWidth, alignSelf: 'center', width: '100%' }
+        ]}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.content}>
+        <View style={[
+          styles.content,
+          isLargeScreen && { paddingHorizontal: 40 }
+        ]}>
           <Text style={styles.title}>Exercise Complete! 🎉</Text>
           <Text style={styles.subtitle}>All chords mastered</Text>
         
