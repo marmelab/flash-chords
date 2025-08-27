@@ -7,13 +7,13 @@ import {
   Platform,
   Dimensions,
 } from "react-native";
-import { useNavigation, useRoute } from '@react-navigation/native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useNavigation, useRoute } from "@react-navigation/native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as ScreenOrientation from "expo-screen-orientation";
 import PianoKey from "./PianoKey";
 import ChordControls from "./ChordControls";
 import { notes, getInversionName } from "../data/chords";
-import { ContinuousAudioRecognition } from '../logic/continuousAudioRecognition';
+import { ContinuousAudioRecognition } from "../logic/continuousAudioRecognition";
 import {
   initPianoAudio,
   playPianoNote,
@@ -30,13 +30,11 @@ import {
   type FlashcardDeck,
   type DeckStats,
 } from "../logic/flashcardLogic";
-import type { PracticeScreenNavigationProp, PracticeScreenRouteProp } from '../navigation/types';
 import type {
-  Chord,
-  InversionType,
-  Note,
-  KeyStyle,
-} from "../types";
+  PracticeScreenNavigationProp,
+  PracticeScreenRouteProp,
+} from "../navigation/types";
+import type { Chord, InversionType, Note, KeyStyle } from "../types";
 
 // Helper functions for orientation control
 const lockToLandscape = (): void => {
@@ -57,7 +55,9 @@ const unlockOrientation = async (): Promise<void> => {
 
   try {
     // Set to portrait first
-    await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
+    await ScreenOrientation.lockAsync(
+      ScreenOrientation.OrientationLock.PORTRAIT_UP
+    );
     console.log("Reset to portrait");
   } catch (error) {
     console.log("Could not reset orientation:", error);
@@ -67,32 +67,31 @@ const unlockOrientation = async (): Promise<void> => {
 // Helper function to extract chord type from chord name
 // Normalizes different naming conventions (e.g., "C Major" vs "C" vs "CMaj")
 const extractChordType = (chordName: string): string => {
-  if (!chordName) return '';
-  
+  if (!chordName) return "";
+
   // Remove any extra whitespace and convert to consistent format
   let normalized = chordName.trim();
-  
+
   // Handle detected chord formats (e.g., "C Major 7" -> "Cmaj7")
-  normalized = normalized.replace(/\s+Major\s+7/i, 'maj7');
-  normalized = normalized.replace(/\s+Minor\s+7/i, 'm7');
-  normalized = normalized.replace(/\s+Major/i, '');
-  normalized = normalized.replace(/\s+Minor/i, 'm');
-  normalized = normalized.replace(/\s+Diminished/i, 'dim');
-  normalized = normalized.replace(/\s+Augmented/i, 'aug');
-  normalized = normalized.replace(/\s+/g, ''); // Remove all spaces
-  
+  normalized = normalized.replace(/\s+Major\s+7/i, "maj7");
+  normalized = normalized.replace(/\s+Minor\s+7/i, "m7");
+  normalized = normalized.replace(/\s+Major/i, "");
+  normalized = normalized.replace(/\s+Minor/i, "m");
+  normalized = normalized.replace(/\s+Diminished/i, "dim");
+  normalized = normalized.replace(/\s+Augmented/i, "aug");
+  normalized = normalized.replace(/\s+/g, ""); // Remove all spaces
+
   // Now normalize case for comparison
   // Keep root uppercase, quality lowercase
   const match = normalized.match(/^([A-G][#b]?)(.*)$/);
   if (!match) return normalized.toLowerCase();
-  
+
   const root = match[1];
   const quality = match[2].toLowerCase();
-  
+
   // Build normalized chord type
   return root + quality;
 };
-
 
 const PianoKeyboard: React.FC = () => {
   const navigation = useNavigation<PracticeScreenNavigationProp>();
@@ -114,55 +113,61 @@ const PianoKeyboard: React.FC = () => {
   const [screenDimensions, setScreenDimensions] = useState(() =>
     Dimensions.get("window")
   );
-  
+
   // Audio mode states
   const [audioMode, setAudioMode] = useState<boolean>(false);
-  const [continuousRecognition] = useState(() => new ContinuousAudioRecognition());
-  const [lastDetectedChord, setLastDetectedChord] = useState<string | null>(null);
+  const [continuousRecognition] = useState(
+    () => new ContinuousAudioRecognition()
+  );
+  const [lastDetectedChord, setLastDetectedChord] = useState<string | null>(
+    null
+  );
   const [waitingForChord, setWaitingForChord] = useState<boolean>(false);
   const [isListening, setIsListening] = useState<boolean>(false);
 
   // Initialize audio system and load preferences
   useEffect(() => {
     initPianoAudio();
-    
+
     // Load saved preferences
     const loadPreferences = async () => {
       try {
         const [savedSound, savedShowNames] = await Promise.all([
-          AsyncStorage.getItem('soundEnabled'),
-          AsyncStorage.getItem('showKeyNames')
+          AsyncStorage.getItem("soundEnabled"),
+          AsyncStorage.getItem("showKeyNames"),
         ]);
-        
+
         if (savedSound !== null) {
-          setSoundEnabled(savedSound === 'true');
+          setSoundEnabled(savedSound === "true");
         }
         if (savedShowNames !== null) {
-          setShowKeyNames(savedShowNames === 'true');
+          setShowKeyNames(savedShowNames === "true");
         }
         setPreferencesLoaded(true);
       } catch (error) {
-        console.error('Error loading preferences:', error);
+        console.error("Error loading preferences:", error);
         setPreferencesLoaded(true);
       }
     };
-    
+
     loadPreferences();
   }, []);
-  
+
   // Save sound preference when it changes
   useEffect(() => {
     if (preferencesLoaded) {
-      AsyncStorage.setItem('soundEnabled', soundEnabled.toString())
-        .catch(error => console.error('Error saving sound preference:', error));
+      AsyncStorage.setItem("soundEnabled", soundEnabled.toString()).catch(
+        (error) => console.error("Error saving sound preference:", error)
+      );
     }
   }, [soundEnabled, preferencesLoaded]);
-  
+
   // Save show key names preference when it changes
   useEffect(() => {
     if (preferencesLoaded) {
-      AsyncStorage.setItem('showKeyNames', showKeyNames.toString())
-        .catch(error => console.error('Error saving show names preference:', error));
+      AsyncStorage.setItem("showKeyNames", showKeyNames.toString()).catch(
+        (error) => console.error("Error saving show names preference:", error)
+      );
     }
   }, [showKeyNames, preferencesLoaded]);
 
@@ -202,7 +207,7 @@ const PianoKeyboard: React.FC = () => {
       handleGenerateNewChord(false);
     }
   }, [flashcardDeck]);
-  
+
   // Handle audio mode changes
   useEffect(() => {
     if (audioMode) {
@@ -210,20 +215,27 @@ const PianoKeyboard: React.FC = () => {
       setIsListening(true);
       continuousRecognition.start((chord, detectedNotes) => {
         setLastDetectedChord(chord);
-        
+
         // Only process detection if we're still in audio mode and waiting for a chord
-        if (audioMode && waitingForChord && chord && detectedNotes.length > 0 && !showResult && currentChord) {
+        if (
+          audioMode &&
+          waitingForChord &&
+          chord &&
+          detectedNotes.length > 0 &&
+          !showResult &&
+          currentChord
+        ) {
           // Check if the detected chord type matches the expected chord
           const detectedChordType = extractChordType(chord);
           const expectedChordType = extractChordType(currentChord.name);
-          
+
           if (detectedChordType === expectedChordType) {
             // In audio mode, we accept any inversion of the correct chord
             // Use the expected notes for visual feedback
             const expectedNotes = currentChord.notes[currentInversion] || [];
             setSelectedKeys(new Set(expectedNotes));
             setWaitingForChord(false);
-            
+
             // Process as correct answer after a short delay
             setTimeout(() => {
               handleAudioResult(true);
@@ -232,7 +244,7 @@ const PianoKeyboard: React.FC = () => {
             // Show the wrong chord that was played
             setSelectedKeys(new Set(detectedNotes));
             setWaitingForChord(false);
-            
+
             // Process as incorrect answer after a short delay
             setTimeout(() => {
               handleAudioResult(false);
@@ -247,7 +259,7 @@ const PianoKeyboard: React.FC = () => {
       setLastDetectedChord(null);
       setWaitingForChord(false);
     }
-    
+
     // Cleanup on unmount
     return () => {
       continuousRecognition.stop();
@@ -284,18 +296,18 @@ const PianoKeyboard: React.FC = () => {
         ...deckToUse,
         currentCard: nextCard,
       });
-      
+
       // If audio mode is enabled, set waiting for chord
       if (audioMode) {
         setWaitingForChord(true);
       }
     }
   };
-  
+
   const toggleAudioMode = () => {
     const newMode = !audioMode;
     setAudioMode(newMode);
-    
+
     if (newMode && currentChord && !showResult) {
       // Set waiting for chord when enabling audio mode
       setWaitingForChord(true);
@@ -360,7 +372,7 @@ const PianoKeyboard: React.FC = () => {
     // Check if exercise is complete
     if (newStats.isComplete) {
       setTimeout(() => {
-        navigation.navigate('Summary', { deckStats: newStats });
+        navigation.navigate("Summary", { deckStats: newStats });
       }, 1500);
     } else {
       // Move to next chord after delay
@@ -415,10 +427,7 @@ const PianoKeyboard: React.FC = () => {
   const whiteKeyWidth = safeWidth / 14; // 14 white keys total
   const blackKeyWidth = whiteKeyWidth * 0.6; // Black keys are 60% of white key width
 
-  const getKeyPosition = (
-    note: Note,
-    whiteKeyIndex: number
-  ): number => {
+  const getKeyPosition = (note: Note, whiteKeyIndex: number): number => {
     if (note.type === "white") {
       return whiteKeyIndex * whiteKeyWidth;
     }
@@ -496,72 +505,78 @@ const PianoKeyboard: React.FC = () => {
         <TouchableOpacity
           style={styles.backButton}
           onPress={async () => {
-          // Reset orientation before navigating
-          await unlockOrientation();
-          // Small delay to ensure orientation change completes
-          setTimeout(() => {
-            navigation.goBack();
-          }, 100);
-        }}
-      >
-        <Text style={styles.backButtonText}>‹</Text>
-      </TouchableOpacity>
+            // Reset orientation before navigating
+            await unlockOrientation();
+            // Small delay to ensure orientation change completes
+            setTimeout(() => {
+              navigation.goBack();
+            }, 100);
+          }}
+        >
+          <Text style={styles.backButtonText}>‹</Text>
+        </TouchableOpacity>
 
-      <TouchableOpacity
-        style={[styles.audioModeToggle, audioMode && styles.audioModeActive]}
-        onPress={toggleAudioMode}
-      >
-        <Text style={[styles.audioModeToggleText, audioMode && styles.audioModeActiveText]}>
-          🎤
-        </Text>
-      </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.audioModeToggle, audioMode && styles.audioModeActive]}
+          onPress={toggleAudioMode}
+        >
+          <Text
+            style={[
+              styles.audioModeToggleText,
+              audioMode && styles.audioModeActiveText,
+            ]}
+          >
+            🎤
+          </Text>
+        </TouchableOpacity>
 
-      <TouchableOpacity
-        style={styles.soundToggle}
-        onPress={() => setSoundEnabled(!soundEnabled)}
-      >
-        <Text style={styles.soundToggleText}>{soundEnabled ? "🔊" : "🔇"}</Text>
-      </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.soundToggle}
+          onPress={() => setSoundEnabled(!soundEnabled)}
+        >
+          <Text style={styles.soundToggleText}>
+            {soundEnabled ? "🔊" : "🔇"}
+          </Text>
+        </TouchableOpacity>
 
-      <TouchableOpacity
-        style={styles.keyNamesToggle}
-        onPress={() => setShowKeyNames(!showKeyNames)}
-      >
-        <Text style={styles.keyNamesToggleText}>
-          {showKeyNames ? "ABC" : "abc"}
-        </Text>
-      </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.keyNamesToggle}
+          onPress={() => setShowKeyNames(!showKeyNames)}
+        >
+          <Text style={styles.keyNamesToggleText}>
+            {showKeyNames ? "ABC" : "abc"}
+          </Text>
+        </TouchableOpacity>
 
-      <View
-        style={[
-          styles.chordCard,
-          showResult && (isCorrect ? styles.correctCard : styles.incorrectCard),
-        ]}
-      >
-        <Text style={styles.chordText}>
-          {currentChord?.name}
-          {currentInversion !== "root"
-            ? ` - ${getInversionName(currentInversion)}`
-            : ""}
-        </Text>
-      </View>
-
-      {deckStats && (
-        <View style={styles.progressContainer}>
-          <View style={styles.progressBar}>
-            <View
-              style={[
-                styles.progressFill,
-                { width: `${deckStats.completionPercentage}%` },
-              ]}
-            />
-          </View>
+        <View
+          style={[
+            styles.chordCard,
+            showResult &&
+              (isCorrect ? styles.correctCard : styles.incorrectCard),
+          ]}
+        >
+          <Text style={styles.chordText}>
+            {currentChord?.name}
+            {currentInversion !== "root"
+              ? ` - ${getInversionName(currentInversion)}`
+              : ""}
+          </Text>
         </View>
-      )}
 
-        <View style={styles.keyboard}>
-        {renderKeys()}
-      </View>
+        {deckStats && (
+          <View style={styles.progressContainer}>
+            <View style={styles.progressBar}>
+              <View
+                style={[
+                  styles.progressFill,
+                  { width: `${deckStats.completionPercentage}%` },
+                ]}
+              />
+            </View>
+          </View>
+        )}
+
+        <View style={styles.keyboard}>{renderKeys()}</View>
 
         <ChordControls
           showResult={showResult}
@@ -577,7 +592,7 @@ const PianoKeyboard: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#2c3e50',
+    backgroundColor: "#2c3e50",
     justifyContent: "center",
     alignItems: "center",
   },
@@ -586,6 +601,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     position: "relative",
+    paddingBottom: 20, // Add padding to account for system controls
   },
   backButton: {
     position: "absolute",
@@ -657,27 +673,31 @@ const styles = StyleSheet.create({
     opacity: 1,
   },
   chordCard: {
+    position: "absolute",
+    top: 12, // Align better with other buttons
+    left: "auto",
+    right: "auto",
     backgroundColor: "rgba(255, 255, 255, 0.05)",
-    paddingHorizontal: 30,
-    paddingVertical: 16,
-    marginBottom: 10,
-    marginTop: 20,
-    minHeight: 50,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    height: 60,
+    borderRadius: 8,
     alignItems: "center",
     justifyContent: "center",
+    zIndex: 10,
+  },
+  chordText: {
+    fontSize: 28,
+    fontWeight: "600",
+    color: "rgba(255, 255, 255, 0.9)",
+    textAlign: "center",
+    letterSpacing: 0.5,
   },
   correctCard: {
     backgroundColor: "rgba(39, 174, 96, 0.3)",
   },
   incorrectCard: {
     backgroundColor: "rgba(231, 76, 60, 0.3)",
-  },
-  chordText: {
-    fontSize: 32,
-    fontWeight: "400",
-    color: "rgba(255, 255, 255, 0.9)",
-    textAlign: "center",
-    letterSpacing: 1.5,
   },
   keyboard: {
     width: "100%",
@@ -694,8 +714,8 @@ const styles = StyleSheet.create({
   },
   progressContainer: {
     width: "100%",
-    marginTop: 10,
-    marginBottom: 0,
+    marginTop: 70, // Space for the top buttons row
+    marginBottom: 0, // No margin between progress and keyboard
   },
   progressBar: {
     width: "100%",
