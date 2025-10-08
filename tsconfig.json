@@ -3,7 +3,7 @@
   "compilerOptions": {
     "strict": true,
     "jsx": "react-native",
-    "lib": ["esnext"],
+    "lib": ["esnext", "dom"],
     "moduleResolution": "bundler",
     "noEmit": true,
     "skipLibCheck": true,
