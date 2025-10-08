@@ -38,3 +38,6 @@ yarn-error.*
 
 # code coverage
 coverage/
+
+# IDE specific
+.claude
