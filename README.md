@@ -23,7 +23,7 @@ An interactive React Native app for learning and practicing piano chords with re
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/fzaninotto/chord-cards.git
+git clone https://github.com/marmelab/chord-cards.git
 cd chord-cards
 ```
 
