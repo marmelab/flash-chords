@@ -93,6 +93,15 @@ Run tests with coverage:
 npm run test:coverage
 ```
 
+## Releasing
+
+To push the app on a connected iOS device, type the following commands:
+
+```bash
+npx expo prebuild --clean    
+npx expo run:ios --configuration Release --device
+```
+
 ## CI/CD
 
 The project includes GitHub Actions workflow that automatically:
